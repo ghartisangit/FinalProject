@@ -1,3 +1,4 @@
+// this is the code of magarsangit
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
