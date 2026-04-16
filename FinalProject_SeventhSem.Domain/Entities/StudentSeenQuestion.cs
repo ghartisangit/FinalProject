@@ -1,0 +1,19 @@
+﻿using FinalProject_SeventhSem.Domain.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FinalProject_SeventhSem.Domain.Entities;
+
+public class StudentSeenQuestion : BaseEntity
+{
+    public int StudentId { get; set; }
+    public int QuestionId { get; set; }
+    public DateTime AskedAt { get; set; } = DateTime.UtcNow;
+
+    // Navigation
+    public Student Student { get; set; } = null!;
+    public Question Question { get; set; } = null!;
+}
