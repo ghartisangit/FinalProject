@@ -1,4 +1,5 @@
-﻿using FinalProject_SeventhSem.Application.Exceptions;
+﻿using FinalProject_SeventhSem.Application.Common;
+using FinalProject_SeventhSem.Application.Exceptions;
 using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
@@ -23,8 +24,7 @@ public class UpdateStudentProfileCommandHandler : IRequestHandler<UpdateStudentP
 
     public async Task Handle(UpdateStudentProfileCommand request, CancellationToken cancellationToken)
     {
-        var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Student), request.StudentId);
+        var student = await StudentResolver.ResolveAsync(request.UserId, _studentRepo, cancellationToken);
 
         student.FullName = request.FullName;
         student.PhoneNumber = request.PhoneNumber;

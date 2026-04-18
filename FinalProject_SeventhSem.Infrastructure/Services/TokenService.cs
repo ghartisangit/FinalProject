@@ -20,6 +20,13 @@ public class TokenService : ITokenService
         return Convert.ToBase64String(bytes);
     }
 
+    /// <summary>
+    /// First 16 chars of the Base64 token — unique enough for a DB lookup,
+    /// not reversible to the full token, safe to store in plain text.
+    /// </summary>
+    public string GenerateLookupKey(string rawToken)
+        => rawToken.Length >= 16 ? rawToken[..16] : rawToken;
+
     public string HashToken(string rawToken)
         => BCrypt.Net.BCrypt.HashPassword(rawToken, workFactor: 11);
 

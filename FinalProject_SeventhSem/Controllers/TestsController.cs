@@ -1,6 +1,7 @@
 ﻿using FinalProject_SeventhSem.Application.Features.Tests.Commands.StartTest;
 using FinalProject_SeventhSem.Application.Features.Tests.Commands.SubmitAnswer;
 using FinalProject_SeventhSem.Application.Features.Tests.Commands.SubmitTest;
+using FinalProject_SeventhSem.Application.Features.Tests.Queries.GetTestHistory;
 using FinalProject_SeventhSem.Application.Models.Tests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,52 +25,44 @@ namespace FinalProject_SeventhSem.Controllers;
 [Authorize(Roles = "Student")]
 public class TestsController : ApiController
 {
-    private int CurrentStudentId =>
-       int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private int CurrentUserId =>
+        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    /// <summary>
-    /// Start a new test session. Returns question set selected by Algorithm 7.
-    /// Tests are general — not tied to any vacancy.
-    /// </summary>
+    /// <summary>Start a new test session — Algorithm 7 (Round-Robin Question Selection).</summary>
     [HttpPost("start")]
     [ProducesResponseType(typeof(TestSessionResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Start(CancellationToken ct)
     {
-        var result = await Sender.Send(new StartTestCommand(CurrentStudentId), ct);
+        var result = await Sender.Send(new StartTestCommand(CurrentUserId), ct);
         return StatusCode(StatusCodes.Status201Created, result);
     }
 
-    /// <summary>
-    /// Submit a single answer for an active test session.
-    /// Checks time limit on every call; auto-submits and throws 400 if expired.
-    /// </summary>
+    /// <summary>Submit a single answer. Auto-submits test if time limit exceeded.</summary>
     [HttpPost("{testId:int}/answers")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> SubmitAnswer(
-        int testId,
-        [FromBody] SubmitAnswerRequest request,
-        CancellationToken ct)
+        int testId, [FromBody] SubmitAnswerRequest request, CancellationToken ct)
     {
         await Sender.Send(new SubmitAnswerCommand(
-            testId, CurrentStudentId, request.QuestionId, request.SelectedOption), ct);
+            testId, CurrentUserId, request.QuestionId, request.SelectedOption), ct);
         return NoContent();
     }
 
-    /// <summary>
-    /// Explicitly submit a test. Triggers Algorithms 8–11 and returns the full result.
-    /// Only answered questions are scored.
-    /// </summary>
+    /// <summary>Explicitly submit test. Triggers Algorithms 8–11. Rate-limited: 3/hour.</summary>
     [HttpPost("{testId:int}/submit")]
     [ProducesResponseType(typeof(TestResultResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Submit(int testId, CancellationToken ct)
     {
-        var result = await Sender.Send(new SubmitTestCommand(testId, CurrentStudentId), ct);
+        var result = await Sender.Send(new SubmitTestCommand(testId, CurrentUserId), ct);
+        return Ok(result);
+    }
+
+    /// <summary>Get all past test results for the authenticated student. IsLatest marks the ranking-used score.</summary>
+    [HttpGet("history")]
+    [ProducesResponseType(typeof(IReadOnlyList<TestHistoryItemDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetHistory(CancellationToken ct)
+    {
+        var result = await Sender.Send(new GetTestHistoryQuery(CurrentUserId), ct);
         return Ok(result);
     }
 }

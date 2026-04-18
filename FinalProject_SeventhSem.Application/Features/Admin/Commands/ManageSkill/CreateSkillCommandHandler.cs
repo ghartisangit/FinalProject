@@ -84,3 +84,27 @@ public class CreateSkillAliasCommandHandler : IRequestHandler<CreateSkillAliasCo
     }
 }
 
+
+
+public class DeleteSkillAliasCommandHandler : IRequestHandler<DeleteSkillAliasCommand>
+{
+    private readonly IRepository<SkillAlias> _aliasRepo;
+    private readonly IUnitOfWork _uow;
+
+    public DeleteSkillAliasCommandHandler(IRepository<SkillAlias> aliasRepo, IUnitOfWork uow)
+    {
+        _aliasRepo = aliasRepo;
+        _uow = uow;
+    }
+
+    public async Task Handle(DeleteSkillAliasCommand request, CancellationToken cancellationToken)
+    {
+        var alias = await _aliasRepo.GetByIdAsync(request.AliasId, cancellationToken)
+            ?? throw new NotFoundException(nameof(SkillAlias), request.AliasId);
+
+        _aliasRepo.Remove(alias);
+        await _uow.SaveChangesAsync(cancellationToken);
+    }
+}
+
+

@@ -18,7 +18,7 @@ namespace FinalProject_SeventhSem.Application.Features.Tests.Commands.SubmitAnsw
 
 public record SubmitAnswerCommand(
     int TestId,
-    int StudentId,
+    int UserId,
     int QuestionId,
     string SelectedOption   // "A" | "B" | "C" | "D"
 ) : IRequest;
@@ -69,7 +69,7 @@ public class SubmitAnswerCommandHandler : IRequestHandler<SubmitAnswerCommand>
         var test = await _testRepo.GetByIdAsync(request.TestId, cancellationToken)
             ?? throw new NotFoundException(nameof(Test), request.TestId);
 
-        if (test.StudentId != request.StudentId)
+        if (test.StudentId != request.UserId)
             throw new UnauthorizedException("This test does not belong to you.");
 
         if (test.Status != TestStatus.InProgress)
@@ -79,7 +79,7 @@ public class SubmitAnswerCommandHandler : IRequestHandler<SubmitAnswerCommand>
         if (DateTime.UtcNow > test.ExpiresAt)
         {
             await _mediator.Send(
-                new SubmitTest.SubmitTestCommand(request.TestId, request.StudentId),
+                new SubmitTest.SubmitTestCommand(request.TestId, request.UserId),
                 cancellationToken);
             throw new TestExpiredException();
         }

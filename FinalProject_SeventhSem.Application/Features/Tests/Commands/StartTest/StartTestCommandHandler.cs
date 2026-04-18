@@ -1,4 +1,5 @@
-﻿using FinalProject_SeventhSem.Application.Common.Settings;
+﻿using FinalProject_SeventhSem.Application.Common;
+using FinalProject_SeventhSem.Application.Common.Settings;
 using FinalProject_SeventhSem.Application.Exceptions;
 using FinalProject_SeventhSem.Application.Models.Tests;
 using FinalProject_SeventhSem.Domain.Entities;
@@ -13,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Tests.Commands.StartTest;
+
 
 /// <summary>
 /// Algorithm 7 — Random Non-Repeating Round-Robin Question Selection.
@@ -55,8 +57,7 @@ public class StartTestCommandHandler : IRequestHandler<StartTestCommand, TestSes
     public async Task<TestSessionResponse> Handle(
         StartTestCommand request, CancellationToken cancellationToken)
     {
-        var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Student), request.StudentId);
+        var student = await StudentResolver.ResolveAsync(request.StudentId, _studentRepo, cancellationToken);
 
         // Fetch seen question IDs for this student
         var seenIds = (await _seenRepo.GetAllAsync(cancellationToken))

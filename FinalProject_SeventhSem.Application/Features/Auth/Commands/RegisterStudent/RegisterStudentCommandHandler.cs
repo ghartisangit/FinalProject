@@ -70,6 +70,7 @@ public class RegisterStudentCommandHandler
         {
             UserId = user.Id,
             TokenHash = _tokenService.HashToken(rawRefresh),
+            TokenLookup = _tokenService.GenerateLookupKey(rawRefresh),
             ExpiresAt = DateTime.UtcNow.AddDays(7)
         };
         await _refreshTokenRepo.AddAsync(refreshToken, cancellationToken);
@@ -82,5 +83,4 @@ public class RegisterStudentCommandHandler
             User: new UserSummary(user.Id, user.Email, user.Role.ToString()));
     }
 }
-
 

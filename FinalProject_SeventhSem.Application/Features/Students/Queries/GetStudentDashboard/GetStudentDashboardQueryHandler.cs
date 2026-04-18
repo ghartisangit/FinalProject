@@ -1,4 +1,5 @@
-﻿using FinalProject_SeventhSem.Application.Exceptions;
+﻿using FinalProject_SeventhSem.Application.Common;
+using FinalProject_SeventhSem.Application.Exceptions;
 using FinalProject_SeventhSem.Application.Models.Students;
 using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
@@ -10,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Students.Queries.GetStudentDashboard;
+
 
 
 /// <summary>
@@ -34,8 +36,7 @@ public class GetStudentDashboardQueryHandler
         GetStudentDashboardQuery request,
         CancellationToken cancellationToken)
     {
-        var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Student), request.StudentId);
+        var student = await StudentResolver.ResolveAsync(request.UserId, _studentRepo, cancellationToken);
 
         bool hasFullName = !string.IsNullOrWhiteSpace(student.FullName);
         bool hasPhoto = !string.IsNullOrWhiteSpace(student.PhotoUrl);
@@ -81,4 +82,5 @@ public class GetStudentDashboardQueryHandler
             HasNationality: hasNationality);
     }
 }
+
 

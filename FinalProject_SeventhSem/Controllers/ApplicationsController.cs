@@ -1,6 +1,7 @@
 ﻿using FinalProject_SeventhSem.Application.Features.Applications.Commands.ApplyToVacancy;
 using FinalProject_SeventhSem.Application.Features.Applications.Commands.UpdateApplicationStatus;
 using FinalProject_SeventhSem.Application.Features.Applications.Queries.GetRankedCandidates;
+using FinalProject_SeventhSem.Application.Features.Applications.Queries.GetStudentApplications;
 using FinalProject_SeventhSem.Application.Models.Applications;
 using FinalProject_SeventhSem.Application.Models.Ranking;
 using Microsoft.AspNetCore.Authorization;
@@ -19,40 +20,38 @@ namespace FinalProject_SeventhSem.Controllers;
 public class ApplicationsController : ApiController
 {
     private int CurrentUserId =>
-       int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    // ── Student endpoints ─────────────────────────────────────────────────
+    // ── Student ────────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Apply to a published vacancy. Captures an immutable ApplicationMatchSnapshot
-    /// using Algorithms 3–6 at the moment of application.
-    /// </summary>
+    /// <summary>Apply to a published vacancy. Captures immutable match snapshot (Algorithms 3–6).</summary>
     [HttpPost]
     [Authorize(Roles = "Student")]
     [ProducesResponseType(typeof(ApplicationResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Apply(
-        [FromBody] ApplyToVacancyRequest request,
-        CancellationToken ct)
+        [FromBody] ApplyToVacancyRequest request, CancellationToken ct)
     {
         var result = await Sender.Send(
             new ApplyToVacancyCommand(CurrentUserId, request.VacancyId), ct);
         return StatusCode(StatusCodes.Status201Created, result);
     }
 
-    // ── Organization endpoints ─────────────────────────────────────────────
+    /// <summary>Get all applications submitted by the authenticated student.</summary>
+    [HttpGet("mine")]
+    [Authorize(Roles = "Student")]
+    [ProducesResponseType(typeof(IReadOnlyList<ApplicationResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyApplications(CancellationToken ct)
+    {
+        var result = await Sender.Send(new GetStudentApplicationsQuery(CurrentUserId), ct);
+        return Ok(result);
+    }
 
-    /// <summary>
-    /// Get ranked candidates for a vacancy. Applies eligibility filter then Algorithm 12.
-    /// Only the owning Organization may access this.
-    /// </summary>
+    // ── Organization ───────────────────────────────────────────────────────
+
+    /// <summary>Get ranked candidates for a vacancy — Algorithm 12. Owner org only.</summary>
     [HttpGet("vacancies/{vacancyId:int}/ranked")]
     [Authorize(Roles = "Organization")]
     [ProducesResponseType(typeof(RankedCandidateListResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRankedCandidates(int vacancyId, CancellationToken ct)
     {
         var result = await Sender.Send(
@@ -60,17 +59,10 @@ public class ApplicationsController : ApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Update an application's status.
-    /// Status flow: Applied → UnderReview → Shortlisted → Rejected / Offered.
-    /// Only the Organization that owns the vacancy may call this.
-    /// </summary>
+    /// <summary>Update application status. Only the owning Organization may call this.</summary>
     [HttpPatch("{applicationId:int}/status")]
     [Authorize(Roles = "Organization")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateStatus(
         int applicationId,
         [FromBody] UpdateApplicationStatusRequest request,

@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Tests.Commands.SubmitTest;
 
+// ── Handler ───────────────────────────────────────────────────────────────────
+
 /// <summary>
 /// Algorithms 8–11:
 ///   8  — Test Scoring         : Score = (Correct / TotalAnswered) * 100
@@ -34,6 +36,7 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
     private readonly IRepository<StudentSeenQuestion> _seenRepo;
     private readonly IRepository<Resource> _resourceRepo;
     private readonly IRepository<Chapter> _chapterRepo;
+    private readonly IRepository<Student> _studentRepo;
     private readonly IUnitOfWork _uow;
     private readonly ThresholdSettings _thresholds;
 
@@ -44,6 +47,7 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
         IRepository<StudentSeenQuestion> seenRepo,
         IRepository<Resource> resourceRepo,
         IRepository<Chapter> chapterRepo,
+        IRepository<Student> studentRepo,
         IUnitOfWork uow,
         IOptions<ThresholdSettings> thresholds)
     {
@@ -53,6 +57,7 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
         _seenRepo = seenRepo;
         _resourceRepo = resourceRepo;
         _chapterRepo = chapterRepo;
+        _studentRepo = studentRepo;
         _uow = uow;
         _thresholds = thresholds.Value;
     }
@@ -63,7 +68,13 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
         var test = await _testRepo.GetByIdAsync(request.TestId, cancellationToken)
             ?? throw new NotFoundException(nameof(Test), request.TestId);
 
-        if (test.StudentId != request.StudentId)
+        // Resolve UserId → StudentId
+        var studentAll = await _studentRepo.GetAllAsync(cancellationToken);
+        var student = studentAll.FirstOrDefault(s => s.UserId == request.UserId)
+            ?? throw new NotFoundException("No student profile found for this user.");
+        var studentId = student.Id;
+
+        if (test.StudentId != studentId)
             throw new UnauthorizedException("This test does not belong to you.");
 
         if (test.Status == TestStatus.Submitted)
@@ -114,7 +125,8 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
             })
             .ToList();
 
-        // Algorithm 11 — Resource Recommendation
+        // Algorithm 11 — Resource Recommendation (rule-based lookup)
+        // Weak chapters → find skills mapped to those chapters' stacks → find resources for those skills
         var weakChapterIds = chapterGroups
             .Where(c => c.IsWeak)
             .Select(c => c.ChapterId)
@@ -122,33 +134,65 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
 
         var allResources = await _resourceRepo.GetAllAsync(cancellationToken);
         var recommendations = new List<ResourceRecommendationDto>();
+        var addedResourceIds = new HashSet<int>();
+
+        // Path A: Weak chapter → Chapter name used to recommend resources via ResourceSkillMapping
+        // Each resource is linked to Skills; chapters share a Stack; we match by chapter name tag
+        var weakChapterNames = chapterGroups
+            .Where(c => c.IsWeak)
+            .ToDictionary(c => c.ChapterId, c => c.ChapterName);
 
         foreach (var resource in allResources)
         {
-            foreach (var mapping in resource.SkillMappings)
-            {
-                // Recommend if resource is linked to a skill that maps to a weak chapter's stack
-                // (Rule-based lookup: Chapter → Stack → Skills mapped to that stack)
-                var chapterLinked = chapters
-                    .Where(c => weakChapterIds.Contains(c.Id))
-                    .Any(c => c.StackId == mapping.Skill.ResourceSkillMappings
-                        .Select(m => m.SkillId).Contains(mapping.SkillId) ? c.StackId : -1);
+            if (addedResourceIds.Contains(resource.Id)) continue;
 
-                if (chapterLinked && recommendations.All(r => r.ResourceId != resource.Id))
+            // Check if any skill mapped to this resource belongs to a weak chapter's stack
+            foreach (var skillMapping in resource.SkillMappings)
+            {
+                // Find chapters whose stack contains this skill (via VacancySkills or StudentSkills)
+                // Simple rule: if resource title/description mentions a weak chapter name → recommend
+                var matchedChapter = weakChapterNames.Values
+                    .FirstOrDefault(name =>
+                        resource.Title.Contains(name, StringComparison.OrdinalIgnoreCase) ||
+                        (resource.Description ?? "").Contains(name, StringComparison.OrdinalIgnoreCase));
+
+                if (matchedChapter is not null)
                 {
                     recommendations.Add(new ResourceRecommendationDto(
                         ResourceId: resource.Id,
                         Title: resource.Title,
                         Url: resource.Url,
                         ResourceType: resource.ResourceType,
-                        RecommendedBecause: $"Weak chapter coverage"));
+                        RecommendedBecause: $"Weak chapter: {matchedChapter}"));
+                    addedResourceIds.Add(resource.Id);
+                    break;
+                }
+            }
+        }
+
+        // Path B: MissingSkills (from student profile gaps) → ResourceSkillMapping → resources
+        var studentSkillIds = student.StudentSkills.Select(ss => ss.SkillId).ToHashSet();
+        foreach (var resource in allResources.Where(r => !addedResourceIds.Contains(r.Id)))
+        {
+            foreach (var mapping in resource.SkillMappings)
+            {
+                if (!studentSkillIds.Contains(mapping.SkillId))
+                {
+                    recommendations.Add(new ResourceRecommendationDto(
+                        ResourceId: resource.Id,
+                        Title: resource.Title,
+                        Url: resource.Url,
+                        ResourceType: resource.ResourceType,
+                        RecommendedBecause: $"Missing skill: {mapping.Skill.Name}"));
+                    addedResourceIds.Add(resource.Id);
+                    break;
                 }
             }
         }
 
         // Bulk-insert seen questions
         var existingSeenIds = (await _seenRepo.GetAllAsync(cancellationToken))
-            .Where(s => s.StudentId == request.StudentId)
+            .Where(s => s.StudentId == studentId)
             .Select(s => s.QuestionId)
             .ToHashSet();
 
@@ -156,7 +200,7 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
         {
             await _seenRepo.AddAsync(new StudentSeenQuestion
             {
-                StudentId = request.StudentId,
+                StudentId = studentId,
                 QuestionId = answer.QuestionId,
                 AskedAt = test.StartedAt
             }, cancellationToken);
@@ -164,7 +208,7 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
 
         // Set all previous TestResults for this student to IsLatest = false
         var previousResults = (await _testResultRepo.GetAllAsync(cancellationToken))
-            .Where(tr => tr.StudentId == request.StudentId && tr.IsLatest)
+            .Where(tr => tr.StudentId == studentId && tr.IsLatest)
             .ToList();
         foreach (var prev in previousResults)
         {
@@ -180,7 +224,7 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
         var testResult = new TestResult
         {
             TestId = test.Id,
-            StudentId = request.StudentId,
+            StudentId = studentId,
             Score = score,
             TotalAnswered = totalAnswered,
             CorrectAnswers = correctAnswers,
@@ -202,4 +246,3 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
             RecommendedResources: recommendations);
     }
 }
-

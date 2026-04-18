@@ -30,7 +30,6 @@ namespace FinalProject_SeventhSem.Infrastructure.Engines;
 /// Algorithm 6 — Skill Gap (Set Difference):
 ///   MissingSkills = (RequiredSkills ∪ OptionalSkills) − StudentSkills
 /// </summary>
-
 public class MatchingEngine : IMatchingService
 {
     private readonly ThresholdSettings _thresholds;

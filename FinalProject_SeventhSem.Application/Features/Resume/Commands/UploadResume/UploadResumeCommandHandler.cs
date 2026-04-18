@@ -1,4 +1,5 @@
-﻿using FinalProject_SeventhSem.Application.Exceptions;
+﻿using FinalProject_SeventhSem.Application.Common;
+using FinalProject_SeventhSem.Application.Exceptions;
 using FinalProject_SeventhSem.Application.Interfaces;
 using FinalProject_SeventhSem.Application.Models.Resume;
 using FinalProject_SeventhSem.Domain.Entities;
@@ -34,8 +35,7 @@ public class UploadResumeCommandHandler : IRequestHandler<UploadResumeCommand, R
     public async Task<ResumeParseResponse> Handle(
         UploadResumeCommand request, CancellationToken cancellationToken)
     {
-        var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Student), request.StudentId);
+        var student = await StudentResolver.ResolveAsync(request.UserId, _studentRepo, cancellationToken);
 
         // Delete old resume if exists
         if (!string.IsNullOrWhiteSpace(student.ResumeUrl))
@@ -54,4 +54,3 @@ public class UploadResumeCommandHandler : IRequestHandler<UploadResumeCommand, R
         return await _parser.ExtractSkillsAsync(cleanText);
     }
 }
-

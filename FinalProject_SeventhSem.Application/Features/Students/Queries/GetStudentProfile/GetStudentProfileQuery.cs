@@ -11,7 +11,9 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Students.Queries.GetStudentProfile;
 
-public record GetStudentProfileQuery(int StudentId) : IRequest<StudentProfileResponse>;
+/// <summary>UserId comes from the JWT sub claim (not the Student table PK).</summary>
+public record GetStudentProfileQuery(int UserId) : IRequest<StudentProfileResponse>;
+
 
 // ── Handler ───────────────────────────────────────────────────────────────────
 

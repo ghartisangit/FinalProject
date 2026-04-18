@@ -15,46 +15,31 @@ namespace FinalProject_SeventhSem.Controllers;
 [Authorize(Roles = "Student")]
 public class ResumeController : ApiController
 {
-    private int CurrentStudentId =>
+    private int CurrentUserId =>
        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    /// <summary>
-    /// Upload a PDF resume. Returns skill suggestions from Algorithm 2.
-    /// Student must call POST /confirm after reviewing suggestions.
-    /// </summary>
+    /// <summary>Upload PDF resume. Returns skill suggestions (Algorithms 1+2). Rate-limited: 5/hour.</summary>
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(ResumeParseResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Upload(
-        IFormFile file,
-        CancellationToken ct)
+    public async Task<IActionResult> Upload(IFormFile file, CancellationToken ct)
     {
         if (file is null || file.Length == 0)
             return BadRequest(new { message = "No file uploaded." });
-
         await using var stream = file.OpenReadStream();
-
         var result = await Sender.Send(
-            new UploadResumeCommand(CurrentStudentId, stream, file.FileName), ct);
-
+            new UploadResumeCommand(CurrentUserId, stream, file.FileName), ct);
         return Ok(result);
     }
 
-    /// <summary>
-    /// Confirm the final list of skills after reviewing suggestions.
-    /// Replaces all previous confirmed skills for this student.
-    /// </summary>
+    /// <summary>Confirm reviewed skill suggestions. Replaces all previously confirmed skills.</summary>
     [HttpPost("confirm")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ConfirmSkills(
-        [FromBody] ConfirmResumeSkillsRequest request,
-        CancellationToken ct)
+        [FromBody] ConfirmResumeSkillsRequest request, CancellationToken ct)
     {
-        await Sender.Send(
-            new SetStudentSkillsCommand(CurrentStudentId, request.ConfirmedSkillIds), ct);
-
+        await Sender.Send(new SetStudentSkillsCommand(CurrentUserId, request.ConfirmedSkillIds), ct);
         return NoContent();
     }
 }

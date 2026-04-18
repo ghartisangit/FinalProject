@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace FinalProject_SeventhSem.Application.Features.Students.Commands.UpdateStudentProfile;
 
 public record UpdateStudentProfileCommand(
-    int StudentId,
+    int UserId,
     string FullName,
     string? PhoneNumber,
     string? Bio,

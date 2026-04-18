@@ -36,29 +36,31 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
 
     public async Task<AuthResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        // Find matching token by verifying BCrypt hash
+        // Derive lookup key — fetches a single row instead of scanning all tokens with BCrypt
+        var lookupKey = _tokenService.GenerateLookupKey(request.RawRefreshToken);
+
         var allTokens = await _refreshTokenRepo.GetAllAsync(cancellationToken);
-        var stored = allTokens.FirstOrDefault(t =>
-            !t.IsRevoked &&
-            t.ExpiresAt > DateTime.UtcNow &&
-            _tokenService.VerifyToken(request.RawRefreshToken, t.TokenHash));
+
+        // Narrow to the single candidate row using the plain-text lookup key
+        var candidate = allTokens.FirstOrDefault(t => t.TokenLookup == lookupKey);
+
+        if (candidate is not null && candidate.IsRevoked)
+        {
+            // Security breach: token was already rotated — revoke entire user chain
+            var chain = allTokens.Where(t => t.UserId == candidate.UserId).ToList();
+            foreach (var t in chain) t.IsRevoked = true;
+            await _uow.SaveChangesAsync(cancellationToken);
+            throw new InvalidRefreshTokenException("Token reuse detected. All sessions revoked.");
+        }
+
+        var stored = candidate is not null
+            && !candidate.IsRevoked
+            && candidate.ExpiresAt > DateTime.UtcNow
+            && _tokenService.VerifyToken(request.RawRefreshToken, candidate.TokenHash)
+                ? candidate : null;
 
         if (stored is null)
-        {
-            // Check if the token is revoked (breach detection)
-            var revoked = allTokens.FirstOrDefault(t =>
-                t.IsRevoked && _tokenService.VerifyToken(request.RawRefreshToken, t.TokenHash));
-
-            if (revoked is not null)
-            {
-                // Revoke entire chain
-                var chain = allTokens.Where(t => t.UserId == revoked.UserId).ToList();
-                foreach (var t in chain) t.IsRevoked = true;
-                await _uow.SaveChangesAsync(cancellationToken);
-            }
-
             throw new InvalidRefreshTokenException();
-        }
 
         var user = await _userRepo.GetByIdAsync(stored.UserId, cancellationToken)
             ?? throw new NotFoundException(nameof(User), stored.UserId);
@@ -71,6 +73,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
         {
             UserId = user.Id,
             TokenHash = _tokenService.HashToken(rawNew),
+            TokenLookup = _tokenService.GenerateLookupKey(rawNew),
             ExpiresAt = DateTime.UtcNow.AddDays(7)
         };
         await _refreshTokenRepo.AddAsync(newToken, cancellationToken);
@@ -86,4 +89,3 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
             User: new UserSummary(user.Id, user.Email, user.Role.ToString()));
     }
 }
-

@@ -1,5 +1,9 @@
 ﻿using FinalProject_SeventhSem.Application.Common.Settings;
+using FinalProject_SeventhSem.Application.Exceptions;
+using FinalProject_SeventhSem.Domain.Entities;
+using FinalProject_SeventhSem.Domain.Interfaces;
 using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -14,7 +18,6 @@ public class CreateSkillCommandValidator : AbstractValidator<CreateSkillCommand>
     public CreateSkillCommandValidator()
         => RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
 }
-
 
 public class CreateSkillAliasCommandValidator : AbstractValidator<CreateSkillAliasCommand>
 {
@@ -33,3 +36,11 @@ public class CreateSkillAliasCommandValidator : AbstractValidator<CreateSkillAli
             .WithMessage("Alias cannot be a stopword.");
     }
 }
+
+
+public class DeleteSkillAliasCommandValidator : AbstractValidator<DeleteSkillAliasCommand>
+{
+    public DeleteSkillAliasCommandValidator()
+        => RuleFor(x => x.AliasId).GreaterThan(0);
+}
+

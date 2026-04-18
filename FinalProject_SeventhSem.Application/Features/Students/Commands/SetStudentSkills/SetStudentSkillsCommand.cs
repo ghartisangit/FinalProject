@@ -1,4 +1,5 @@
-﻿using FinalProject_SeventhSem.Application.Exceptions;
+﻿using FinalProject_SeventhSem.Application.Common;
+using FinalProject_SeventhSem.Application.Exceptions;
 using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using FluentValidation;
@@ -11,8 +12,14 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Students.Commands.SetStudentSkills;
 
+// ── Command ───────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Replaces the student's confirmed skills with the provided SkillIds.
+/// Called after the student reviews resume parsing suggestions.
+/// </summary>
 public record SetStudentSkillsCommand(
-    int StudentId,
+    int UserId,
     IReadOnlyList<int> ConfirmedSkillIds
 ) : IRequest;
 
@@ -49,8 +56,7 @@ public class SetStudentSkillsCommandHandler : IRequestHandler<SetStudentSkillsCo
 
     public async Task Handle(SetStudentSkillsCommand request, CancellationToken cancellationToken)
     {
-        var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Student), request.StudentId);
+        var student = await StudentResolver.ResolveAsync(request.UserId, _studentRepo, cancellationToken);
 
         // Remove existing confirmed skills
         foreach (var existing in student.StudentSkills.ToList())
@@ -70,4 +76,3 @@ public class SetStudentSkillsCommandHandler : IRequestHandler<SetStudentSkillsCo
         await _uow.SaveChangesAsync(cancellationToken);
     }
 }
-

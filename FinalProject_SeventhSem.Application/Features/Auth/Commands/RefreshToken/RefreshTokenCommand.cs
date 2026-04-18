@@ -23,5 +23,6 @@ public class RefreshTokenCommandValidator : AbstractValidator<RefreshTokenComman
         => RuleFor(x => x.RawRefreshToken).NotEmpty();
 }
 
+
 // ── Handler ───────────────────────────────────────────────────────────────────
 

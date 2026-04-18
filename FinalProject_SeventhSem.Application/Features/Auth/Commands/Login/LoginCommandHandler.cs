@@ -62,6 +62,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         {
             UserId = user.Id,
             TokenHash = _tokenService.HashToken(rawRefresh),
+            TokenLookup = _tokenService.GenerateLookupKey(rawRefresh),
             ExpiresAt = DateTime.UtcNow.AddDays(7)
         };
         await _refreshTokenRepo.AddAsync(refreshToken, cancellationToken);

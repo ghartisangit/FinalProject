@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Tests.Commands.SubmitTest;
 
-public record SubmitTestCommand(int TestId, int StudentId) : IRequest<TestResultResponse>;
+public record SubmitTestCommand(int TestId, int UserId) : IRequest<TestResultResponse>;
 
 // ── Validator ─────────────────────────────────────────────────────────────────
 
@@ -24,7 +24,7 @@ public class SubmitTestCommandValidator : AbstractValidator<SubmitTestCommand>
     public SubmitTestCommandValidator()
     {
         RuleFor(x => x.TestId).GreaterThan(0);
-        RuleFor(x => x.StudentId).GreaterThan(0);
+        RuleFor(x => x.UserId).GreaterThan(0);
     }
 }
 

@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace FinalProject_SeventhSem.Application.Features.Resume.Commands.UploadResume;
 
 public record UploadResumeCommand(
-    int StudentId,
+    int UserId,
     Stream PdfStream,
     string FileName
 ) : IRequest<ResumeParseResponse>;

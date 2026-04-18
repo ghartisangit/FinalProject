@@ -1,5 +1,6 @@
 ﻿using FinalProject_SeventhSem.Application.Features.Students.Commands.SetStudentSkills;
 using FinalProject_SeventhSem.Application.Features.Students.Commands.UpdateStudentProfile;
+using FinalProject_SeventhSem.Application.Features.Students.Commands.UploadProfilePhoto;
 using FinalProject_SeventhSem.Application.Features.Students.Queries.GetStudentDashboard;
 using FinalProject_SeventhSem.Application.Features.Students.Queries.GetStudentProfile;
 using FinalProject_SeventhSem.Application.Models.Students;
@@ -17,66 +18,55 @@ namespace FinalProject_SeventhSem.Controllers;
 [Authorize(Roles = "Student")]
 public class StudentController : ApiController
 {
-    private int CurrentStudentId =>
-       int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private int CurrentUserId =>
+        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    /// <summary>Get the authenticated student's full profile.</summary>
     [HttpGet("me")]
     [ProducesResponseType(typeof(StudentProfileResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProfile(CancellationToken ct)
-    {
-        var result = await Sender.Send(new GetStudentProfileQuery(CurrentStudentId), ct);
-        return Ok(result);
-    }
+        => Ok(await Sender.Send(new GetStudentProfileQuery(CurrentUserId), ct));
 
-    /// <summary>Update the authenticated student's profile fields.</summary>
     [HttpPut("me")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateProfile(
-        [FromBody] UpdateStudentProfileRequest request,
-        CancellationToken ct)
+        [FromBody] UpdateStudentProfileRequest request, CancellationToken ct)
     {
         await Sender.Send(new UpdateStudentProfileCommand(
-            StudentId: CurrentStudentId,
-            FullName: request.FullName,
-            PhoneNumber: request.PhoneNumber,
-            Bio: request.Bio,
-            Nationality: request.Nationality,
-            Location: request.Location,
-            EducationLevel: request.EducationLevel,
-            FieldOfStudy: request.FieldOfStudy,
-            GitHubUrl: request.GitHubUrl,
-            PortfolioUrl: request.PortfolioUrl,
+            UserId: CurrentUserId, FullName: request.FullName,
+            PhoneNumber: request.PhoneNumber, Bio: request.Bio,
+            Nationality: request.Nationality, Location: request.Location,
+            EducationLevel: request.EducationLevel, FieldOfStudy: request.FieldOfStudy,
+            GitHubUrl: request.GitHubUrl, PortfolioUrl: request.PortfolioUrl,
             LinkedInUrl: request.LinkedInUrl), ct);
-
         return NoContent();
     }
 
-    /// <summary>
-    /// Get the authenticated student's profile completeness dashboard.
-    /// Computed on the fly — max score 100.
-    /// </summary>
     [HttpGet("me/dashboard")]
     [ProducesResponseType(typeof(ProfileCompletenessResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDashboard(CancellationToken ct)
-    {
-        var result = await Sender.Send(new GetStudentDashboardQuery(CurrentStudentId), ct);
-        return Ok(result);
-    }
+        => Ok(await Sender.Send(new GetStudentDashboardQuery(CurrentUserId), ct));
 
-    /// <summary>
-    /// Replace the student's confirmed skill set.
-    /// Called after reviewing resume parsing suggestions.
-    /// </summary>
     [HttpPut("me/skills")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetSkills(
-        [FromBody] IReadOnlyList<int> confirmedSkillIds,
-        CancellationToken ct)
+        [FromBody] IReadOnlyList<int> confirmedSkillIds, CancellationToken ct)
     {
-        await Sender.Send(new SetStudentSkillsCommand(CurrentStudentId, confirmedSkillIds), ct);
+        await Sender.Send(new SetStudentSkillsCommand(CurrentUserId, confirmedSkillIds), ct);
         return NoContent();
+    }
+
+    /// <summary>Upload a profile photo (JPG, PNG, WEBP — max 5 MB).</summary>
+    [HttpPost("me/photo")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadPhoto(IFormFile file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest(new { message = "No file uploaded." });
+        await using var stream = file.OpenReadStream();
+        var url = await Sender.Send(
+            new UploadProfilePhotoCommand(CurrentUserId, stream, file.FileName), ct);
+        return Ok(new { photoUrl = url });
     }
 }
