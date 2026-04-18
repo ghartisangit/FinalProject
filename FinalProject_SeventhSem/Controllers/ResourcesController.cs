@@ -1,11 +1,53 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FinalProject_SeventhSem.Application.Features.Resources.Commands.GetRecommendResources;
+using FinalProject_SeventhSem.Application.Features.Resources.Commands.RateResource;
+using FinalProject_SeventhSem.Application.Models.Tests;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
-namespace FinalProject_SeventhSem.Controllers
+namespace FinalProject_SeventhSem.Controllers;
+
+
+
+/// <summary>
+/// Learning resource recommendations (Algorithm 11) and student ratings.
+/// </summary>
+[Authorize(Roles = "Student")]
+public class ResourcesController : ApiController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ResourcesController : ControllerBase
+    private int CurrentStudentId =>
+        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+    /// <summary>
+    /// Get personalised resource recommendations.
+    /// Rule-based lookup: weak chapters + missing skills → resources (Algorithm 11).
+    /// </summary>
+    [HttpGet("recommended")]
+    [ProducesResponseType(typeof(IReadOnlyList<ResourceRecommendationDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetRecommended(CancellationToken ct)
     {
+        var result = await Sender.Send(new GetRecommendedResourcesQuery(CurrentStudentId), ct);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Rate a learning resource (1–5 stars). One rating per student per resource.
+    /// </summary>
+    [HttpPost("{resourceId:int}/rate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Rate(
+        int resourceId,
+        [FromBody] RateRequest request,
+        CancellationToken ct)
+    {
+        await Sender.Send(new RateResourceCommand(
+            resourceId, CurrentStudentId, request.Rating, request.Comment), ct);
+        return NoContent();
     }
 }
+
+
+public record RateRequest(int Rating, string? Comment);
