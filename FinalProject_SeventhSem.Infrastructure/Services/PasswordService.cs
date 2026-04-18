@@ -1,12 +1,19 @@
-﻿using System;
+﻿using FinalProject_SeventhSem.Application.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FinalProject_SeventhSem.Infrastructure.Services
+namespace FinalProject_SeventhSem.Infrastructure.Services;
+
+/// <summary>BCrypt.Net-Next implementation of IPasswordService.</summary>
+public class PasswordService : IPasswordService
 {
-    internal class PasswordService
-    {
-    }
+    public string Hash(string plainPassword)
+        => BCrypt.Net.BCrypt.HashPassword(plainPassword, workFactor: 12);
+
+    public bool Verify(string plainPassword, string hash)
+        => BCrypt.Net.BCrypt.Verify(plainPassword, hash);
 }
+
