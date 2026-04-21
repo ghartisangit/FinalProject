@@ -27,7 +27,7 @@ public class StudentController : ApiController
         => Ok(await Sender.Send(new GetStudentProfileQuery(CurrentUserId), ct));
 
     [HttpPut("me")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(StudentProfileResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateProfile(
         [FromBody] UpdateStudentProfileRequest request, CancellationToken ct)
     {
@@ -38,7 +38,8 @@ public class StudentController : ApiController
             EducationLevel: request.EducationLevel, FieldOfStudy: request.FieldOfStudy,
             GitHubUrl: request.GitHubUrl, PortfolioUrl: request.PortfolioUrl,
             LinkedInUrl: request.LinkedInUrl), ct);
-        return NoContent();
+        var profile = await Sender.Send(new GetStudentProfileQuery(CurrentUserId), ct);
+        return Ok(profile);
     }
 
     [HttpGet("me/dashboard")]

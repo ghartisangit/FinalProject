@@ -3,6 +3,7 @@ using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -149,8 +150,15 @@ public class UpdateResourceCommandHandler : IRequestHandler<UpdateResourceComman
 
     public async Task<ResourceDto> Handle(UpdateResourceCommand request, CancellationToken ct)
     {
-        var resource = await _resourceRepo.GetByIdAsync(request.ResourceId, ct)
-            ?? throw new NotFoundException(nameof(Resource), request.ResourceId);
+        //var resource = await _resourceRepo.GetByIdAsync(request.ResourceId, ct)
+        //    ?? throw new NotFoundException(nameof(Resource), request.ResourceId);
+
+        var resource = await _resourceRepo.GetByIdAsync(
+               id: request.ResourceId,
+               include: q => q.Include(r => r.SkillMappings)
+                              .Include(r => r.Ratings),
+               cancellationToken: ct)
+               ?? throw new NotFoundException(nameof(Resource), request.ResourceId);
 
         resource.Title = request.Title;
         resource.Description = request.Description;
@@ -230,7 +238,12 @@ public class GetAllResourcesQueryHandler : IRequestHandler<GetAllResourcesQuery,
 
     public async Task<IReadOnlyList<ResourceDto>> Handle(GetAllResourcesQuery request, CancellationToken ct)
     {
-        var resources = await _resourceRepo.GetAllAsync(ct);
+        //var resources = await _resourceRepo.GetAllAsync(ct);
+        var resources = await _resourceRepo.GetAllAsync(
+           include: q => q.Include(r => r.Ratings)
+                          .Include(r => r.SkillMappings)
+                              .ThenInclude(m => m.Skill),
+           cancellationToken: ct);
         return resources
             .OrderBy(r => r.Title)
             .Select(r =>

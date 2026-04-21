@@ -36,7 +36,8 @@ public class GetVacancyMatchesQueryHandler
             ?? throw new NotFoundException(nameof(Student), request.StudentId);
 
         var vacancies = (await _vacancyRepo.GetAllAsync(cancellationToken))
-            .Where(v => v.IsPublished)
+            .Where(v => v.IsPublished
+                     && DateTime.UtcNow <= v.ApplicationDeadline)  // ← exclude passed deadline
             .ToList();
 
         var results = vacancies

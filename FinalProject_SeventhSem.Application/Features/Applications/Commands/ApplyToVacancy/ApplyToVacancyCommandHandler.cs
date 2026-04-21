@@ -1,4 +1,5 @@
-﻿using FinalProject_SeventhSem.Application.Exceptions;
+﻿using FinalProject_SeventhSem.Application.Common;
+using FinalProject_SeventhSem.Application.Exceptions;
 using FinalProject_SeventhSem.Application.Interfaces;
 using FinalProject_SeventhSem.Application.Models.Applications;
 using FinalProject_SeventhSem.Domain.Entities;
@@ -44,14 +45,20 @@ public class ApplyToVacancyCommandHandler : IRequestHandler<ApplyToVacancyComman
     public async Task<ApplicationResponse> Handle(
         ApplyToVacancyCommand request, CancellationToken cancellationToken)
     {
-        var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Student), request.StudentId);
+        var student = await StudentResolver.ResolveAsync(request.StudentId, _studentRepo, cancellationToken);
+        //var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
+            //?? throw new NotFoundException(nameof(Student), request.StudentId);
 
         var vacancy = await _vacancyRepo.GetByIdAsync(request.VacancyId, cancellationToken)
             ?? throw new NotFoundException(nameof(Vacancy), request.VacancyId);
 
         if (!vacancy.IsPublished)
             throw new BadRequestException("Cannot apply to an unpublished vacancy.");
+
+        if (DateTime.UtcNow > vacancy.ApplicationDeadline)
+            throw new BadRequestException(
+                $"The application deadline was {vacancy.ApplicationDeadline:dd MMM yyyy HH:mm} UTC. " +
+                $"This vacancy is no longer accepting applications.");
 
         // Duplicate application check
         var existing = (await _applicationRepo.GetAllAsync(cancellationToken))

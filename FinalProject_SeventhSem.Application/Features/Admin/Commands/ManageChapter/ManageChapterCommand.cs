@@ -4,6 +4,7 @@ using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,8 +90,14 @@ public class UpdateChapterCommandHandler : IRequestHandler<UpdateChapterCommand,
 
     public async Task<ChapterResponse> Handle(UpdateChapterCommand request, CancellationToken ct)
     {
-        var chapter = await _chapterRepo.GetByIdAsync(request.ChapterId, ct)
-            ?? throw new NotFoundException(nameof(Chapter), request.ChapterId);
+        //var chapter = await _chapterRepo.GetByIdAsync(request.ChapterId, ct)
+        //    ?? throw new NotFoundException(nameof(Chapter), request.ChapterId);
+
+        var chapter = await _chapterRepo.GetByIdAsync(
+      id: request.ChapterId,
+      include: q => q.Include(c => c.Stack).Include(c => c.Questions),
+      cancellationToken: ct)
+      ?? throw new NotFoundException(nameof(Chapter), request.ChapterId);
 
         chapter.Name = request.Name;
         chapter.UpdatedAt = DateTime.UtcNow;
@@ -150,7 +157,11 @@ public class GetChaptersByStackQueryHandler
     public async Task<IReadOnlyList<ChapterResponse>> Handle(
         GetChaptersByStackQuery request, CancellationToken ct)
     {
-        var all = await _chapterRepo.GetAllAsync(ct);
+        //var all = await _chapterRepo.GetAllAsync(ct);
+
+        var all = await _chapterRepo.GetAllAsync(
+       include: q => q.Include(o => o.Stack).Include(o => o.Questions),
+       cancellationToken: ct);
         return all
             .Where(c => c.StackId == request.StackId)
             .OrderBy(c => c.Name)

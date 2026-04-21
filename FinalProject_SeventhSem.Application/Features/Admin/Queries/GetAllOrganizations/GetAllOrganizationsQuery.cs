@@ -1,6 +1,7 @@
 ﻿using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +42,10 @@ public class GetAllOrganizationsQueryHandler
     public async Task<IReadOnlyList<OrganizationSummaryDto>> Handle(
         GetAllOrganizationsQuery request, CancellationToken cancellationToken)
     {
-        var orgs = await _orgRepo.GetAllAsync(cancellationToken);
+        //var orgs = await _orgRepo.GetAllAsync(cancellationToken);
+        var orgs = await _orgRepo.GetAllAsync(
+    include: q => q.Include(o => o.User),
+    cancellationToken: cancellationToken);
 
         var filtered = request.PendingOnly
             ? orgs.Where(o => !o.IsVerified)

@@ -15,6 +15,10 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
     {
         builder.HasKey(rt => rt.Id);
         builder.Property(rt => rt.TokenHash).IsRequired();
+        builder.Property(rt => rt.TokenLookup).IsRequired().HasMaxLength(32);
+
+        // Unique index enables O(1) lookup before BCrypt.Verify
+        builder.HasIndex(rt => rt.TokenLookup).IsUnique();
 
         // Self-referencing FK for rotation chain
         builder.HasOne(rt => rt.ReplacedByToken)
@@ -23,3 +27,4 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
+

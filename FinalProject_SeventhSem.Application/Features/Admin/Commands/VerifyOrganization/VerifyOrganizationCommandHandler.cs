@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Admin.Commands.VerifyOrganization;
 
-public class VerifyOrganizationCommandHandler : IRequestHandler<VerifyOrganizationCommand>
+public class VerifyOrganizationCommandHandler : IRequestHandler<VerifyOrganizationCommand, VerifyOrganizationResponse>
 {
     private readonly IRepository<Organization> _orgRepo;
     private readonly IRepository<User> _userRepo;
@@ -26,7 +26,7 @@ public class VerifyOrganizationCommandHandler : IRequestHandler<VerifyOrganizati
         _uow = uow;
     }
 
-    public async Task Handle(VerifyOrganizationCommand request, CancellationToken cancellationToken)
+    public async Task<VerifyOrganizationResponse> Handle(VerifyOrganizationCommand request, CancellationToken cancellationToken)
     {
         var org = await _orgRepo.GetByIdAsync(request.OrganizationId, cancellationToken)
             ?? throw new NotFoundException(nameof(Organization), request.OrganizationId);
@@ -47,6 +47,14 @@ public class VerifyOrganizationCommandHandler : IRequestHandler<VerifyOrganizati
         _userRepo.Update(user);
 
         await _uow.SaveChangesAsync(cancellationToken);
+
+        return new VerifyOrganizationResponse(
+            OrganizationId: org.Id,
+            OrganizationName: org.Name,
+            Email: user.Email,
+            IsVerified: org.IsVerified,
+            IsActive: user.IsActive,
+            VerifiedAt: org.UpdatedAt!.Value);
     }
 }
 

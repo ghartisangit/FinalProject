@@ -24,7 +24,6 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    // Add services to the container.
 
     builder.Host.UseSerilog((ctx, services, config) => config
         .ReadFrom.Configuration(ctx.Configuration)
@@ -38,7 +37,6 @@ try
     builder.Services.AddApplicationServices(builder.Configuration);
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
-    // ── JWT Authentication ─────────────────────────────────────────────────
     var jwtSection = builder.Configuration.GetSection(JwtSettings.SectionName);
     var jwtSettings = jwtSection.Get<JwtSettings>()!;
 
@@ -66,7 +64,6 @@ try
 
     builder.Services.AddAuthorization();
 
-    // ── Rate Limiting (AspNetCoreRateLimit) ────────────────────────────────
     builder.Services.AddMemoryCache();
     builder.Services.Configure<IpRateLimitOptions>(
         builder.Configuration.GetSection("IpRateLimiting"));
@@ -76,7 +73,6 @@ try
     builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
     builder.Services.AddInMemoryRateLimiting();
 
-    // ── MVC / Swagger ──────────────────────────────────────────────────────
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
@@ -88,7 +84,6 @@ try
             Description = "Deterministic internship matching platform — no ML, no AI."
         });
 
-        // JWT auth in Swagger UI
         c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
             Name = "Authorization",
@@ -114,24 +109,25 @@ try
         });
     });
 
-    // ── CORS (adjust origins for production) ──────────────────────────────
     builder.Services.AddCors(options =>
         options.AddDefaultPolicy(policy =>
             policy.AllowAnyOrigin()
                   .AllowAnyMethod()
                   .AllowAnyHeader()));
 
-    // ─────────────────────────────────────────────────────────────────────
     var app = builder.Build();
-
-    // ── Auto-apply migrations on startup (dev convenience) ────────────────
+    app.Logger.LogInformation("App built successfully, starting pipeline...");
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Database.Migrate();
+
+        // Seed admin, skills, stacks, chapters, questions, resources
+        var seeder = scope.ServiceProvider
+            .GetRequiredService<FinalProject_SeventhSem.Infrastructure.Seeders.DatabaseSeeder>();
+        await seeder.SeedAsync();
     }
 
-    // ── Middleware pipeline ────────────────────────────────────────────────
     app.UseIpRateLimiting();
 
     if (app.Environment.IsDevelopment())
@@ -141,15 +137,15 @@ try
     }
 
     app.UseSerilogRequestLogging();
-    app.UseMiddleware<ExceptionMiddleware>(); // must be before UseRouting
+    app.UseMiddleware<ExceptionMiddleware>(); 
     app.UseHttpsRedirection();
-    app.UseStaticFiles();                    // serves uploaded resumes / photos
+    app.UseStaticFiles();                   
     app.UseCors();
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
 
-    app.Run();
+    await app.RunAsync();
 }
 catch (Exception ex)
 {

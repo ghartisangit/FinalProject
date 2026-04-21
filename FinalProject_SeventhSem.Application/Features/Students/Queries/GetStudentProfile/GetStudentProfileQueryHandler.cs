@@ -4,6 +4,7 @@ using FinalProject_SeventhSem.Application.Models.Students;
 using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,18 @@ public class GetStudentProfileQueryHandler
         GetStudentProfileQuery request,
         CancellationToken cancellationToken)
     {
-        var student = await StudentResolver.ResolveAsync(request.UserId, _studentRepo, cancellationToken);
+        //var student = await StudentResolver.ResolveAsync(request.UserId, _studentRepo, cancellationToken);
+
+        var students = await _studentRepo.GetAllAsync(
+        include: q => q
+            .Where(s => s.UserId == request.UserId)
+            .Include(s => s.User)
+            .Include(s => s.StudentSkills)
+                .ThenInclude(ss => ss.Skill),
+        cancellationToken);
+
+        var student = students.FirstOrDefault()
+            ?? throw new NotFoundException(nameof(Student), request.UserId);
 
         return new StudentProfileResponse(
             StudentId: student.Id,

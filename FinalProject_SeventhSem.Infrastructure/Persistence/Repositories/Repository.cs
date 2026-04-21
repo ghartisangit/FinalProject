@@ -28,9 +28,29 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
     public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         => await _dbSet.FindAsync([id], cancellationToken);
 
+    public async Task<T?> GetByIdAsync(int id,
+    Func<IQueryable<T>, IQueryable<T>>? include = null,
+    CancellationToken cancellationToken = default)
+    {
+        IQueryable<T> query = _context.Set<T>();
+
+        if (include != null)
+            query = include(query);
+
+        return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default)
         => await _dbSet.ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<T>> GetAllAsync(
+    Func<IQueryable<T>, IQueryable<T>> include,
+    CancellationToken cancellationToken = default)
+    {
+        IQueryable<T> query = _context.Set<T>();
+        query = include(query);
+        return await query.ToListAsync(cancellationToken);
+    }
     public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
         => await _dbSet.AddAsync(entity, cancellationToken);
 

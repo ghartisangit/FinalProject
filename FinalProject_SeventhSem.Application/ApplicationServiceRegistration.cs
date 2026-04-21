@@ -44,6 +44,9 @@ public static class ApplicationServiceRegistration
         services.Configure<ResumeParsingSettings>(
             configuration.GetSection(ResumeParsingSettings.SectionName));
 
+        services.Configure<AdminSeedSettings>(
+            configuration.GetSection(AdminSeedSettings.SectionName));
+
         return services;
     }
 }

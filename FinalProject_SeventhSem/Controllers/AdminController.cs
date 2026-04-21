@@ -35,11 +35,13 @@ public class AdminController : ApiController
 
     /// <summary>Verify an organization account so it can log in.</summary>
     [HttpPost("organizations/{organizationId:int}/verify")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(VerifyOrganizationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> VerifyOrganization(int organizationId, CancellationToken ct)
     {
-        await Sender.Send(new VerifyOrganizationCommand(organizationId), ct);
-        return NoContent();
+       var result =  await Sender.Send(new VerifyOrganizationCommand(organizationId), ct);
+        return Ok(result);
     }
 
     // ── Skills ─────────────────────────────────────────────────────────────

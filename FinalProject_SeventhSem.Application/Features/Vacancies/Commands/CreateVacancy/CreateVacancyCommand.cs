@@ -16,10 +16,11 @@ public record CreateVacancyCommand(
     int OrganizationId,
     string Title,
     string Description,
+    DateTime ApplicationDeadline,
     EducationLevel? RequiredEducationLevel,
     string? RequiredFieldOfStudy,
     IReadOnlyList<int> RequiredSkillIds,
-    IReadOnlyList<int> OptionalSkillIds
+    IReadOnlyList<int>? OptionalSkillIds
 ) : IRequest<VacancyResponse>;
 
 // ── Validator ─────────────────────────────────────────────────────────────────

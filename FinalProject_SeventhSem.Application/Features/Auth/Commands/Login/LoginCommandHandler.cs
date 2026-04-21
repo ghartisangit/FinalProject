@@ -5,6 +5,7 @@ using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Enums;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,8 +41,14 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
 
     public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = (await _userRepo.GetAllAsync(cancellationToken))
-            .FirstOrDefault(u => u.Email == request.Email.ToLower());
+        //var user = (await _userRepo.GetAllAsync(cancellationToken))
+        //    .FirstOrDefault(u => u.Email == request.Email.ToLower());
+
+        var users = await _userRepo.GetAllAsync(
+                include: q => q.Include(u => u.Organization),
+                cancellationToken: cancellationToken);
+
+        var user = users.FirstOrDefault(u => u.Email == request.Email.ToLower());
 
         if (user is null || !_passwordService.Verify(request.Password, user.PasswordHash))
             throw new UnauthorizedException("Invalid email or password.");

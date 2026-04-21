@@ -27,7 +27,7 @@ public static class InfrastructureServiceRegistration
         IConfiguration configuration)
     {
         // ── Audit interceptor (singleton — stateless) ──────────────────────
-        services.AddSingleton<AuditInterceptor>();
+        services.AddScoped<AuditInterceptor>();
 
         // ── EF Core DbContext ──────────────────────────────────────────────
         services.AddDbContext<AppDbContext>((sp, options) =>
@@ -65,6 +65,9 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IResumeParsingService, ResumeParsingEngine>();
         services.AddScoped<IMatchingService, MatchingEngine>();
         services.AddScoped<IScoringService, ScoringEngine>();
+
+        // ── Database seeder ────────────────────────────────────────────────
+        services.AddScoped<FinalProject_SeventhSem.Infrastructure.Seeders.DatabaseSeeder>();
 
         return services;
     }

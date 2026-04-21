@@ -1,9 +1,10 @@
 ﻿using FinalProject_SeventhSem.Application.Exceptions;
 using FinalProject_SeventhSem.Application.Models.Stacks;
-using FinalProject_SeventhSem.Domain.Interfaces;
 using FinalProject_SeventhSem.Domain.Entities;
+using FinalProject_SeventhSem.Domain.Interfaces;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -131,7 +132,11 @@ public class GetAllStacksQueryHandler : IRequestHandler<GetAllStacksQuery, IRead
 
     public async Task<IReadOnlyList<StackResponse>> Handle(GetAllStacksQuery request, CancellationToken ct)
     {
-        var stacks = await _stackRepo.GetAllAsync(ct);
+        var stacks = await _stackRepo.GetAllAsync(
+            include: q => q.Include(s => s.Chapters)
+                           .ThenInclude(c => c.Questions),
+            cancellationToken: ct);
+        //var stacks = await _stackRepo.GetAllAsync(ct);
         return stacks
             .OrderBy(s => s.Name)
             .Select(s => new StackResponse(

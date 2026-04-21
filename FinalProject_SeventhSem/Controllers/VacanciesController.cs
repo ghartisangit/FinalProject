@@ -53,8 +53,10 @@ public class VacanciesController : ApiController
         [FromBody] CreateVacancyRequest request, CancellationToken ct)
     {
         var result = await Sender.Send(new CreateVacancyCommand(
-            OrganizationId: CurrentUserId, Title: request.Title,
+            OrganizationId: CurrentUserId,
+            Title: request.Title,
             Description: request.Description,
+            ApplicationDeadline: request.ApplicationDeadline,   // ← add
             RequiredEducationLevel: request.RequiredEducationLevel,
             RequiredFieldOfStudy: request.RequiredFieldOfStudy,
             RequiredSkillIds: request.RequiredSkillIds,
@@ -70,8 +72,11 @@ public class VacanciesController : ApiController
         int id, [FromBody] UpdateVacancyRequest request, CancellationToken ct)
     {
         var result = await Sender.Send(new UpdateVacancyCommand(
-            VacancyId: id, OrganizationId: CurrentUserId,
-            Title: request.Title, Description: request.Description,
+            VacancyId: id,
+            OrganizationId: CurrentUserId,
+            Title: request.Title,
+            Description: request.Description,
+            ApplicationDeadline: request.ApplicationDeadline,   // ← add
             RequiredEducationLevel: request.RequiredEducationLevel,
             RequiredFieldOfStudy: request.RequiredFieldOfStudy,
             RequiredSkillIds: request.RequiredSkillIds,

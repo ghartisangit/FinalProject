@@ -20,6 +20,13 @@ public class Vacancy : BaseEntity
     public EducationLevel? RequiredEducationLevel { get; set; }
     public string? RequiredFieldOfStudy { get; set; }
 
+    /// <summary>
+    /// Optional deadline for applications.
+    /// If set, students cannot apply after this date/time (UTC).
+    /// If null, the vacancy accepts applications indefinitely.
+    /// </summary>
+    public DateTime ApplicationDeadline { get; set; }
+
     // Navigation
     public Organization Organization { get; set; } = null!;
     public ICollection<VacancySkill> VacancySkills { get; set; } = new List<VacancySkill>();
