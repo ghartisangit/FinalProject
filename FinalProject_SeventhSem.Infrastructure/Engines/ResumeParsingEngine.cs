@@ -71,6 +71,29 @@ public class ResumeParsingEngine : IResumeParsingService
 
     // ── Algorithm 1: Text Preprocessing ──────────────────────────────────
 
+    //public string PreprocessText(string rawText)
+    //{
+    //    if (string.IsNullOrWhiteSpace(rawText)) return string.Empty;
+
+    //    // 1. Fix broken lines — join hyphenated line-breaks
+    //    var text = Regex.Replace(rawText, @"-\s*\n\s*", "");
+
+    //    // 2. Normalize newlines to spaces
+    //    text = Regex.Replace(text, @"[\r\n]+", " ");
+
+    //    // 3. Remove special characters, keep letters, digits, spaces
+    //    text = Regex.Replace(text, @"[^a-zA-Z0-9\s]", " ");
+
+    //    // 4. Collapse multiple spaces
+    //    text = Regex.Replace(text, @"\s{2,}", " ");
+
+    //    // 5. Convert to lowercase
+    //    text = text.ToLowerInvariant().Trim();
+
+    //    return text;
+    //}
+
+
     public string PreprocessText(string rawText)
     {
         if (string.IsNullOrWhiteSpace(rawText)) return string.Empty;
@@ -81,13 +104,25 @@ public class ResumeParsingEngine : IResumeParsingService
         // 2. Normalize newlines to spaces
         text = Regex.Replace(text, @"[\r\n]+", " ");
 
-        // 3. Remove special characters, keep letters, digits, spaces
+        // 3. Preserve special-character skills BEFORE stripping
+        text = Regex.Replace(text, @"\bC\+\+\b", "cplusplus", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bC#\b", "csharp", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bC\b", "clang");                  // ← plain C language
+        text = Regex.Replace(text, @"\bF#\b", "fsharp", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\b\.NET\b", "dotnet", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bASP\.NET\b", "aspnetcore", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bNode\.js\b", "nodejs", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bVue\.js\b", "vuejs", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bExpress\.js\b", "expressjs", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bNext\.js\b", "nextjs", RegexOptions.IgnoreCase);
+
+        // 4. Remove special characters, keep letters, digits, spaces
         text = Regex.Replace(text, @"[^a-zA-Z0-9\s]", " ");
 
-        // 4. Collapse multiple spaces
+        // 5. Collapse multiple spaces
         text = Regex.Replace(text, @"\s{2,}", " ");
 
-        // 5. Convert to lowercase
+        // 6. Convert to lowercase
         text = text.ToLowerInvariant().Trim();
 
         return text;

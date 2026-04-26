@@ -5,6 +5,7 @@ using FinalProject_SeventhSem.Application.Models.Applications;
 using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,12 +46,29 @@ public class ApplyToVacancyCommandHandler : IRequestHandler<ApplyToVacancyComman
     public async Task<ApplicationResponse> Handle(
         ApplyToVacancyCommand request, CancellationToken cancellationToken)
     {
-        var student = await StudentResolver.ResolveAsync(request.StudentId, _studentRepo, cancellationToken);
+        //var student = await StudentResolver.ResolveAsync(request.StudentId, _studentRepo, cancellationToken);
         //var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
-            //?? throw new NotFoundException(nameof(Student), request.StudentId);
+        //?? throw new NotFoundException(nameof(Student), request.StudentId);
 
-        var vacancy = await _vacancyRepo.GetByIdAsync(request.VacancyId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Vacancy), request.VacancyId);
+
+        var student = await _studentRepo.GetAsync(
+            predicate: s => s.UserId == request.StudentId,
+            include: q => q.Include(s => s.StudentSkills),
+            cancellationToken: cancellationToken)
+            ?? throw new NotFoundException(nameof(Student), request.StudentId);
+
+        //var vacancy = await _vacancyRepo.GetByIdAsync(request.VacancyId, cancellationToken)
+        //    ?? throw new NotFoundException(nameof(Vacancy), request.VacancyId);
+
+
+        var vacancy = await _vacancyRepo.GetByIdAsync(
+                id: request.VacancyId,
+                include: q => q
+                    .Include(v => v.VacancySkills)
+                        .ThenInclude(vs => vs.Skill)
+                    .Include(v => v.Organization),
+                cancellationToken: cancellationToken)
+                ?? throw new NotFoundException(nameof(Vacancy), request.VacancyId);
 
         if (!vacancy.IsPublished)
             throw new BadRequestException("Cannot apply to an unpublished vacancy.");

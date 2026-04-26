@@ -39,18 +39,16 @@ public class UploadResumeCommandHandler : IRequestHandler<UploadResumeCommand, R
     public async Task<ResumeParseResponse> Handle(
         UploadResumeCommand request, CancellationToken cancellationToken)
     {
-        //var student = await StudentResolver.ResolveAsync(request.UserId, _studentRepo, cancellationToken);
-        try
-        {
+        //try
+        //{
 
-            var student = await _studentRepo.GetByIdAsync(
-            request.UserId,
-            q => q.Include(s => s.StudentSkills),
-            cancellationToken)
+        var student = await _studentRepo.GetAsync(
+            predicate: s => s.UserId == request.UserId,
+            include: q => q.Include(s => s.StudentSkills),
+            cancellationToken: cancellationToken)
             ?? throw new NotFoundException("Student not found.");
 
-            // Delete old resume if exists
-            if (!string.IsNullOrWhiteSpace(student.ResumeUrl))
+        if (!string.IsNullOrWhiteSpace(student.ResumeUrl))
                 await _storage.DeleteAsync(student.ResumeUrl, cancellationToken);
 
             using var storageStream = new MemoryStream();
@@ -62,11 +60,9 @@ public class UploadResumeCommandHandler : IRequestHandler<UploadResumeCommand, R
             storageStream.Position = 0;
             parseStream.Position = 0;
 
-            // Save PDF
             var url = await _storage.SaveAsync(storageStream, request.FileName, "resumes", cancellationToken);
             student.ResumeUrl = url;
             student.UpdatedAt = DateTime.UtcNow;
-            //_studentRepo.Update(student);
 
             foreach (var old in student.StudentSkills.ToList())
                 _studentSkillRepo.Remove(old);
@@ -76,13 +72,6 @@ public class UploadResumeCommandHandler : IRequestHandler<UploadResumeCommand, R
             var parseResult = await _parser.ExtractSkillsAsync(cleanText);
 
 
-            //var existingSkills = await _studentSkillRepo.GetAllAsync(
-            //   q => q.Where(ss => ss.StudentId == student.Id), cancellationToken);
-
-            //foreach (var existing in existingSkills)
-            //    _studentSkillRepo.Remove(existing);
-
-            // ── Save newly extracted skills to DB ──
             foreach (var suggestion in parseResult.Suggestions)
             {
                 await _studentSkillRepo.AddAsync(new StudentSkill
@@ -97,12 +86,11 @@ public class UploadResumeCommandHandler : IRequestHandler<UploadResumeCommand, R
             await _uow.SaveChangesAsync(cancellationToken);
 
             return parseResult;
-        }
-        catch (Exception ex)
-        {
-            // This WILL appear in logs
-            throw new Exception($"UploadResume failed: {ex.GetType().Name} — {ex.Message} — {ex.StackTrace}", ex);
-        }
+        //}
+        //catch (Exception ex)
+        //{
+        //    throw new Exception($"UploadResume failed: {ex.GetType().Name} — {ex.Message} — {ex.StackTrace}", ex);
+        //}
         //return await _parser.ExtractSkillsAsync(cleanText);
     }
 }

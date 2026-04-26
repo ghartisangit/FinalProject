@@ -4,6 +4,7 @@ using FinalProject_SeventhSem.Application.Models.Students;
 using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,8 +37,13 @@ public class GetStudentDashboardQueryHandler
         GetStudentDashboardQuery request,
         CancellationToken cancellationToken)
     {
-        var student = await StudentResolver.ResolveAsync(request.UserId, _studentRepo, cancellationToken);
-
+        //var student = await StudentResolver.ResolveAsync(request.UserId, _studentRepo, cancellationToken);
+        var student = await _studentRepo.GetAsync(
+                   predicate: s => s.UserId == request.UserId,
+                   include: q => q.Include(s => s.StudentSkills),
+                   cancellationToken: cancellationToken)
+                   ?? throw new NotFoundException(
+                       $"No student profile found for UserId {request.UserId}.");
         bool hasFullName = !string.IsNullOrWhiteSpace(student.FullName);
         bool hasPhoto = !string.IsNullOrWhiteSpace(student.PhotoUrl);
         bool hasPhone = !string.IsNullOrWhiteSpace(student.PhoneNumber);

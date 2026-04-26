@@ -1,4 +1,5 @@
 ﻿using FinalProject_SeventhSem.Application.Features.Vacancies.Commands.CreateVacancy;
+using FinalProject_SeventhSem.Application.Features.Vacancies.Commands.DeleteVacancy;
 using FinalProject_SeventhSem.Application.Features.Vacancies.Commands.PublishVacancy;
 using FinalProject_SeventhSem.Application.Features.Vacancies.Commands.UpdateVacancy;
 using FinalProject_SeventhSem.Application.Features.Vacancies.Queries.GetOrganizationVacancies;
@@ -85,12 +86,23 @@ public class VacanciesController : ApiController
     }
 
     /// <summary>Publish a draft vacancy. Guard: must have ≥1 required skill.</summary>
-    [HttpPost("{id:int}/publish")]
+    //[HttpPost("{id:int}/publish")]
+    //[Authorize(Roles = "Organization")]
+    //[ProducesResponseType(StatusCodes.Status204NoContent)]
+    //public async Task<IActionResult> Publish(int id, CancellationToken ct)
+    //{
+    //    await Sender.Send(new PublishVacancyCommand(id, CurrentUserId), ct);
+    //    return NoContent();
+    //}
+
+
+    /// <summary>Delete a vacancy owned by the authenticated organization.</summary>
+    [HttpDelete("{id:int}")]
     [Authorize(Roles = "Organization")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> Publish(int id, CancellationToken ct)
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
-        await Sender.Send(new PublishVacancyCommand(id, CurrentUserId), ct);
+        await Sender.Send(new DeleteVacancyCommand(id, CurrentUserId), ct);
         return NoContent();
     }
 }

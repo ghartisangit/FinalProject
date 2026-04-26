@@ -97,6 +97,8 @@ public class DatabaseSeeder
         {
             // ── Languages ──────────────────────────────────────────────
             ["C#"] = ["csharp", "c-sharp", "dotnet-csharp"],
+            ["C"] = ["clang", "c-language", "c-programming"],      // ← add this
+            ["C++"] = ["cplusplus", "cpp", "c-plus-plus", "cplus"],
             ["JavaScript"] = ["js", "javascript", "ecmascript"],
             ["TypeScript"] = ["ts", "typescript"],
             ["Python"] = ["python3", "py"],
@@ -106,14 +108,18 @@ public class DatabaseSeeder
             ["CSS"] = ["css3", "stylesheet"],
 
             // ── Frameworks / Libraries ────────────────────────────────
-            ["ASP.NET Core"] = ["aspnet", "aspnetcore", "asp-net-core", "dotnet-web"],
+            ["ASP.NET Core"] = ["aspnet", "aspnetcore", "asp-net-core", "dotnet-web", "ASP.NET Core Web API","ASP.NET Core MVC"],
             ["Entity Framework Core"] = ["ef", "efcore", "entity-framework"],
             ["React"] = ["reactjs", "react-js"],
+            ["React Native"] = ["react-native", "rn", "expo", "cross-platform-mobile", "mobile-react"],
+            ["Flutter"] = ["flutter", "dart", "flutter-sdk", "cross-platform-flutter", "mobile-flutter"],
+            ["iOS Development"] = ["ios", "swiftui", "uikit", "xcode", "apple-ios", "iphone-dev"],
+            ["Android Development"] = ["android", "jetpack-compose", "android-studio", "kotlin-android", "android-sdk"],
             ["Angular"] = ["angularjs", "angular-js", "ng"],
             ["Vue.js"] = ["vue", "vuejs", "vue-js"],
             ["Node.js"] = ["nodejs", "node-js", "node"],
             ["Express.js"] = ["express", "expressjs"],
-            ["Django"] = ["django-rest", "drf"],
+            ["Django"] = ["django-rest", "drf", "django REST Framework"],
             ["Spring Boot"] = ["spring", "springboot", "spring-framework"],
             ["Laravel"] = ["php-laravel"],
 
@@ -150,7 +156,8 @@ public class DatabaseSeeder
             // ── Other ─────────────────────────────────────────────────
             ["Linux"] = ["ubuntu", "linux-os", "bash"],
             ["Agile"] = ["scrum", "agile-methodology", "kanban"],
-            ["JWT"] = ["json-web-token", "jwt-auth"],
+            ["JWT"] = ["json-web-token", "jwt-auth", "bearer-token", "jws", "jwt-claims"],
+            ["Machine Learning"] = ["ml", "machine-learning", "supervised", "unsupervised", "sklearn"],
         };
 
         foreach (var (skillName, aliases) in skillData)

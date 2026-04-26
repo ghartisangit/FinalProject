@@ -4,6 +4,7 @@ using FinalProject_SeventhSem.Application.Models.Vacancies;
 using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,13 +33,29 @@ public class GetVacancyMatchesQueryHandler
     public async Task<IReadOnlyList<VacancyMatchResult>> Handle(
         GetVacancyMatchesQuery request, CancellationToken cancellationToken)
     {
-        var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Student), request.StudentId);
+        //var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
+        //    ?? throw new NotFoundException(nameof(Student), request.StudentId);
 
-        var vacancies = (await _vacancyRepo.GetAllAsync(cancellationToken))
-            .Where(v => v.IsPublished
-                     && DateTime.UtcNow <= v.ApplicationDeadline)  // ← exclude passed deadline
-            .ToList();
+        var student = await _studentRepo.GetAsync(
+    predicate: s => s.UserId == request.StudentId,
+    include: q => q.Include(s => s.StudentSkills),
+    cancellationToken: cancellationToken)
+    ?? throw new NotFoundException(nameof(Student), request.StudentId);
+
+
+        //var vacancies = (await _vacancyRepo.GetAllAsync(cancellationToken))
+        //    .Where(v => v.IsPublished
+        //             && DateTime.UtcNow <= v.ApplicationDeadline)  // ← exclude passed deadline
+        //    .ToList();
+
+        var vacancies = (await _vacancyRepo.GetAllAsync(
+                include: q => q
+                    .Include(v => v.VacancySkills)
+                        .ThenInclude(vs => vs.Skill)
+                    .Include(v => v.Organization),
+                cancellationToken: cancellationToken))
+                .Where(v => v.IsPublished && DateTime.UtcNow <= v.ApplicationDeadline)
+                .ToList();
 
         var results = vacancies
             .Select(v => _matching.Match(student, v))

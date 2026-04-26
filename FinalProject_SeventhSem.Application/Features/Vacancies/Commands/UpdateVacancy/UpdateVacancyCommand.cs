@@ -84,9 +84,7 @@ public class UpdateVacancyCommandHandler : IRequestHandler<UpdateVacancyCommand,
     public async Task<VacancyResponse> Handle(
         UpdateVacancyCommand request, CancellationToken cancellationToken)
     {
-        //var vacancy = await _vacancyRepo.GetByIdAsync(request.VacancyId, cancellationToken)
-        //    ?? throw new NotFoundException(nameof(Vacancy), request.VacancyId);
-
+       
 
         var vacancy = await _vacancyRepo.GetByIdAsync(
                id: request.VacancyId,
@@ -100,8 +98,7 @@ public class UpdateVacancyCommandHandler : IRequestHandler<UpdateVacancyCommand,
         if (vacancy.OrganizationId != org.Id)
             throw new UnauthorizedException("You do not own this vacancy.");
 
-        if (vacancy.IsPublished)
-            throw new BadRequestException("Cannot edit a published vacancy. Unpublish it first.");
+       
 
         // Update scalar fields
         vacancy.Title = request.Title;
@@ -141,16 +138,7 @@ public class UpdateVacancyCommandHandler : IRequestHandler<UpdateVacancyCommand,
         }
 
 
-        //foreach (var skillId in request.RequiredSkillIds.Distinct())
-        //    await _vacancySkillRepo.AddAsync(
-        //        new VacancySkill { VacancyId = vacancy.Id, SkillId = skillId, IsRequired = true },
-        //        cancellationToken);
-
-        //foreach (var skillId in request.OptionalSkillIds.Distinct()
-        //             .Where(id => !request.RequiredSkillIds.Contains(id)))
-        //    await _vacancySkillRepo.AddAsync(
-        //        new VacancySkill { VacancyId = vacancy.Id, SkillId = skillId, IsRequired = false },
-        //        cancellationToken);
+      
 
         await _uow.SaveChangesAsync(cancellationToken);
 
