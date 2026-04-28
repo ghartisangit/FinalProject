@@ -3,6 +3,7 @@ using FinalProject_SeventhSem.Application.Models.Applications;
 using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,10 +48,19 @@ public class GetStudentApplicationsQueryHandler
         var allSkills = await _skillRepo.GetAllAsync(cancellationToken);
         var skillMap = allSkills.ToDictionary(s => s.Id, s => s.Name);
 
-        var apps = (await _applicationRepo.GetAllAsync(cancellationToken))
-            .Where(a => a.StudentId == student.Id)
-            .OrderByDescending(a => a.AppliedAt)
-            .ToList();
+        //var apps = (await _applicationRepo.GetAllAsync(cancellationToken))
+        //    .Where(a => a.StudentId == student.Id)
+        //    .OrderByDescending(a => a.AppliedAt)
+        //    .ToList();
+
+        var apps = await _applicationRepo.GetAllAsync(
+    q => q
+        .Include(a => a.Vacancy)
+        .Include(a => a.Student)
+        .Include(a => a.MatchSnapshot)
+        .Where(a => a.StudentId == student.Id)
+        .OrderByDescending(a => a.AppliedAt),
+    cancellationToken);
 
         return apps.Select(a =>
         {
