@@ -5,6 +5,7 @@ using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Enums;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -89,9 +90,18 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
         _testRepo.Update(test);
 
         // Retrieve answers
-        var answers = (await _answerRepo.GetAllAsync(cancellationToken))
-            .Where(a => a.TestId == request.TestId)
-            .ToList();
+        //var answers = (await _answerRepo.GetAllAsync(cancellationToken))
+        //    .Where(a => a.TestId == request.TestId)
+        //    .ToList();
+
+
+        var answers = await _answerRepo.GetAllAsync(
+           q => q
+               .Include(a => a.Question)
+                   .ThenInclude(q => q.Chapter)
+                       .ThenInclude(c => c.Stack)
+               .Where(a => a.TestId == request.TestId),
+           cancellationToken);
 
         // Algorithm 8 — Test Scoring
         int totalAnswered = answers.Count;
@@ -101,56 +111,117 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
             : Math.Round((double)correctAnswers / totalAnswered * 100, 2);
 
         // Algorithm 9 — Chapter Analysis
-        var chapters = await _chapterRepo.GetAllAsync(cancellationToken);
-        var chapterMap = chapters.ToDictionary(c => c.Id);
+        //var chapters = await _chapterRepo.GetAllAsync(cancellationToken);
+        //var chapterMap = chapters.ToDictionary(c => c.Id);
+
+        //var chapterGroups = answers
+        //    .GroupBy(a => a.Question.ChapterId)
+        //    .Select(g =>
+        //    {
+        //        var chapter = chapterMap[g.Key];
+        //        var total = g.Count();
+        //        var correct = g.Count(a => a.IsCorrect);
+        //        var pct = total == 0 ? 0 : Math.Round((double)correct / total * 100, 2);
+
+        //        // Algorithm 10 — Weak Chapter Detection
+        //        bool isWeak = pct < _thresholds.WeakChapterMaxPercent;
+
+        //        return new ChapterScoreDto(
+        //            ChapterId: chapter.Id,
+        //            ChapterName: chapter.Name,
+        //            StackName: chapter.Stack.Name,
+        //            ScorePercent: pct,
+        //            IsWeak: isWeak);
+        //    })
+        //    .ToList();
+
+
 
         var chapterGroups = answers
-            .GroupBy(a => a.Question.ChapterId)
-            .Select(g =>
-            {
-                var chapter = chapterMap[g.Key];
-                var total = g.Count();
-                var correct = g.Count(a => a.IsCorrect);
-                var pct = total == 0 ? 0 : Math.Round((double)correct / total * 100, 2);
+           .GroupBy(a => a.Question.ChapterId)
+           .Select(g =>
+           {
+               var chapter = g.First().Question.Chapter; // ✅ already loaded
+               var total = g.Count();
+               var correct = g.Count(a => a.IsCorrect);
+               var pct = total == 0 ? 0 : Math.Round((double)correct / total * 100, 2);
 
-                // Algorithm 10 — Weak Chapter Detection
-                bool isWeak = pct < _thresholds.WeakChapterMaxPercent;
+               // Algorithm 10 — Weak Chapter Detection
+               bool isWeak = pct < _thresholds.WeakChapterMaxPercent;
 
-                return new ChapterScoreDto(
-                    ChapterId: chapter.Id,
-                    ChapterName: chapter.Name,
-                    StackName: chapter.Stack.Name,
-                    ScorePercent: pct,
-                    IsWeak: isWeak);
-            })
-            .ToList();
+               return new ChapterScoreDto(
+                   ChapterId: chapter.Id,
+                   ChapterName: chapter.Name,
+                   StackName: chapter.Stack.Name,  // ✅ already loaded
+                   ScorePercent: pct,
+                   IsWeak: isWeak);
+           })
+           .ToList();
 
         // Algorithm 11 — Resource Recommendation (rule-based lookup)
         // Weak chapters → find skills mapped to those chapters' stacks → find resources for those skills
-        var weakChapterIds = chapterGroups
-            .Where(c => c.IsWeak)
-            .Select(c => c.ChapterId)
-            .ToHashSet();
+        //var weakChapterIds = chapterGroups
+        //    .Where(c => c.IsWeak)
+        //    .Select(c => c.ChapterId)
+        //    .ToHashSet();
 
-        var allResources = await _resourceRepo.GetAllAsync(cancellationToken);
+        var weakChapterNames = chapterGroups
+           .Where(c => c.IsWeak)
+           .ToDictionary(c => c.ChapterId, c => c.ChapterName);
+
+        //var allResources = await _resourceRepo.GetAllAsync(cancellationToken);
+
+
+        var allResources = await _resourceRepo.GetAllAsync(
+            q => q
+                .Include(r => r.SkillMappings)
+                    .ThenInclude(sm => sm.Skill),
+            cancellationToken);
+
         var recommendations = new List<ResourceRecommendationDto>();
         var addedResourceIds = new HashSet<int>();
 
         // Path A: Weak chapter → Chapter name used to recommend resources via ResourceSkillMapping
         // Each resource is linked to Skills; chapters share a Stack; we match by chapter name tag
-        var weakChapterNames = chapterGroups
-            .Where(c => c.IsWeak)
-            .ToDictionary(c => c.ChapterId, c => c.ChapterName);
+        //var weakChapterNames = chapterGroups
+        //    .Where(c => c.IsWeak)
+        //    .ToDictionary(c => c.ChapterId, c => c.ChapterName);
+
+        //foreach (var resource in allResources)
+        //{
+        //    if (addedResourceIds.Contains(resource.Id)) continue;
+
+        //    // Check if any skill mapped to this resource belongs to a weak chapter's stack
+        //    foreach (var skillMapping in resource.SkillMappings)
+        //    {
+        //        // Find chapters whose stack contains this skill (via VacancySkills or StudentSkills)
+        //        // Simple rule: if resource title/description mentions a weak chapter name → recommend
+        //        var matchedChapter = weakChapterNames.Values
+        //            .FirstOrDefault(name =>
+        //                resource.Title.Contains(name, StringComparison.OrdinalIgnoreCase) ||
+        //                (resource.Description ?? "").Contains(name, StringComparison.OrdinalIgnoreCase));
+
+        //        if (matchedChapter is not null)
+        //        {
+        //            recommendations.Add(new ResourceRecommendationDto(
+        //                ResourceId: resource.Id,
+        //                Title: resource.Title,
+        //                Url: resource.Url,
+        //                ResourceType: resource.ResourceType,
+        //                RecommendedBecause: $"Weak chapter: {matchedChapter}"));
+        //            addedResourceIds.Add(resource.Id);
+        //            break;
+        //        }
+        //    }
+        //}
+
 
         foreach (var resource in allResources)
         {
             if (addedResourceIds.Contains(resource.Id)) continue;
 
-            // Check if any skill mapped to this resource belongs to a weak chapter's stack
             foreach (var skillMapping in resource.SkillMappings)
             {
-                // Find chapters whose stack contains this skill (via VacancySkills or StudentSkills)
-                // Simple rule: if resource title/description mentions a weak chapter name → recommend
                 var matchedChapter = weakChapterNames.Values
                     .FirstOrDefault(name =>
                         resource.Title.Contains(name, StringComparison.OrdinalIgnoreCase) ||
@@ -170,7 +241,28 @@ public class SubmitTestCommandHandler : IRequestHandler<SubmitTestCommand, TestR
             }
         }
 
+
         // Path B: MissingSkills (from student profile gaps) → ResourceSkillMapping → resources
+        //var studentSkillIds = student.StudentSkills.Select(ss => ss.SkillId).ToHashSet();
+        //foreach (var resource in allResources.Where(r => !addedResourceIds.Contains(r.Id)))
+        //{
+        //    foreach (var mapping in resource.SkillMappings)
+        //    {
+        //        if (!studentSkillIds.Contains(mapping.SkillId))
+        //        {
+        //            recommendations.Add(new ResourceRecommendationDto(
+        //                ResourceId: resource.Id,
+        //                Title: resource.Title,
+        //                Url: resource.Url,
+        //                ResourceType: resource.ResourceType,
+        //                RecommendedBecause: $"Missing skill: {mapping.Skill.Name}"));
+        //            addedResourceIds.Add(resource.Id);
+        //            break;
+        //        }
+        //    }
+        //}
+
+
         var studentSkillIds = student.StudentSkills.Select(ss => ss.SkillId).ToHashSet();
         foreach (var resource in allResources.Where(r => !addedResourceIds.Contains(r.Id)))
         {

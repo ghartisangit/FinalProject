@@ -12,9 +12,15 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Applications.Queries.GetRankedCandidates;
 
+//public record GetRankedCandidatesQuery(
+//    int VacancyId,
+//    int OrganizationId
+//) : IRequest<RankedCandidateListResponse>;
+
+
 public record GetRankedCandidatesQuery(
     int VacancyId,
-    int OrganizationId
+    int UserId          // ← renamed from OrganizationId
 ) : IRequest<RankedCandidateListResponse>;
 
 // ── Handler ───────────────────────────────────────────────────────────────────

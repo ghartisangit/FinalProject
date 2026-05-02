@@ -47,6 +47,7 @@ public class SubmitAnswerCommandHandler : IRequestHandler<SubmitAnswerCommand>
     private readonly IRepository<Test> _testRepo;
     private readonly IRepository<Question> _questionRepo;
     private readonly IRepository<TestAnswer> _answerRepo;
+    private readonly IRepository<Student> _studentRepo;
     private readonly IUnitOfWork _uow;
     private readonly IMediator _mediator;
 
@@ -54,12 +55,14 @@ public class SubmitAnswerCommandHandler : IRequestHandler<SubmitAnswerCommand>
         IRepository<Test> testRepo,
         IRepository<Question> questionRepo,
         IRepository<TestAnswer> answerRepo,
+         IRepository<Student> studentRepo,
         IUnitOfWork uow,
         IMediator mediator)
     {
         _testRepo = testRepo;
         _questionRepo = questionRepo;
         _answerRepo = answerRepo;
+        _studentRepo = studentRepo;
         _uow = uow;
         _mediator = mediator;
     }
@@ -69,8 +72,15 @@ public class SubmitAnswerCommandHandler : IRequestHandler<SubmitAnswerCommand>
         var test = await _testRepo.GetByIdAsync(request.TestId, cancellationToken)
             ?? throw new NotFoundException(nameof(Test), request.TestId);
 
-        if (test.StudentId != request.UserId)
+        var studentAll = await _studentRepo.GetAllAsync(cancellationToken);
+        var student = studentAll.FirstOrDefault(s => s.UserId == request.UserId)
+            ?? throw new NotFoundException("No student profile found for this user.");
+
+        if (test.StudentId != student.Id)   // ✅ StudentId vs StudentId now
             throw new UnauthorizedException("This test does not belong to you.");
+
+        //if (test.StudentId != request.UserId)
+        //    throw new UnauthorizedException("This test does not belong to you.");
 
         if (test.Status != TestStatus.InProgress)
             throw new BadRequestException("This test is no longer active.");

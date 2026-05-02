@@ -6,6 +6,7 @@ using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Enums;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ public class StartTestCommandHandler : IRequestHandler<StartTestCommand, TestSes
 {
     private readonly IRepository<Student> _studentRepo;
     private readonly IRepository<Chapter> _chapterRepo;
+    private readonly IRepository<Stack> _stackRepo;
     private readonly IRepository<StudentSeenQuestion> _seenRepo;
     private readonly IRepository<Test> _testRepo;
     private readonly IUnitOfWork _uow;
@@ -41,6 +43,7 @@ public class StartTestCommandHandler : IRequestHandler<StartTestCommand, TestSes
     public StartTestCommandHandler(
         IRepository<Student> studentRepo,
         IRepository<Chapter> chapterRepo,
+        IRepository<Stack> stackRepo,
         IRepository<StudentSeenQuestion> seenRepo,
         IRepository<Test> testRepo,
         IUnitOfWork uow,
@@ -48,6 +51,7 @@ public class StartTestCommandHandler : IRequestHandler<StartTestCommand, TestSes
     {
         _studentRepo = studentRepo;
         _chapterRepo = chapterRepo;
+        _stackRepo = stackRepo;
         _seenRepo = seenRepo;
         _testRepo = testRepo;
         _uow = uow;
@@ -59,15 +63,33 @@ public class StartTestCommandHandler : IRequestHandler<StartTestCommand, TestSes
     {
         var student = await StudentResolver.ResolveAsync(request.StudentId, _studentRepo, cancellationToken);
 
+
+        var stack = await _stackRepo.GetByIdAsync(request.StackId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Stack), request.StackId);
         // Fetch seen question IDs for this student
         var seenIds = (await _seenRepo.GetAllAsync(cancellationToken))
             .Where(s => s.StudentId == request.StudentId)
             .Select(s => s.QuestionId)
             .ToHashSet();
 
-        var chapters = (await _chapterRepo.GetAllAsync(cancellationToken))
-            .Where(c => c.Questions.Any())
-            .ToList();
+        //var chapters = (await _chapterRepo.GetAllAsync(cancellationToken))
+        //    .Where(c => c.Questions.Any())
+        //    .ToList();
+
+        //var chapters = await _chapterRepo.GetAllAsync(
+        //   q => q
+        //       .Include(c => c.Questions)
+        //       .Include(c => c.Stack)
+        //       .Where(c => c.Questions.Any()),
+        //   cancellationToken);
+
+
+        var chapters = await _chapterRepo.GetAllAsync(
+         q => q
+             .Include(c => c.Questions)
+             .Include(c => c.Stack)
+             .Where(c => c.StackId == request.StackId && c.Questions.Any()),
+         cancellationToken);
 
         if (!chapters.Any())
             throw new BadRequestException("No questions are available for a test session.");

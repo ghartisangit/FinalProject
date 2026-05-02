@@ -28,12 +28,21 @@ public class TestsController : ApiController
     private int CurrentUserId =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+
+    /// <summary>Get all available stacks the student can choose from before starting a test.</summary>
+    //[HttpGet("stacks")]
+    //[ProducesResponseType(typeof(IReadOnlyList<StackDto>), StatusCodes.Status200OK)]
+    //public async Task<IActionResult> GetAvailableStacks(CancellationToken ct)
+    //{
+    //    var result = await Sender.Send(new GetAvailableStacksQuery(), ct);
+    //    return Ok(result);
+    //}
     /// <summary>Start a new test session — Algorithm 7 (Round-Robin Question Selection).</summary>
     [HttpPost("start")]
     [ProducesResponseType(typeof(TestSessionResponse), StatusCodes.Status201Created)]
-    public async Task<IActionResult> Start(CancellationToken ct)
+    public async Task<IActionResult> Start([FromBody] StartTestRequest request, CancellationToken ct)
     {
-        var result = await Sender.Send(new StartTestCommand(CurrentUserId), ct);
+        var result = await Sender.Send(new StartTestCommand(CurrentUserId, request.StackId), ct);
         return StatusCode(StatusCodes.Status201Created, result);
     }
 
@@ -66,3 +75,5 @@ public class TestsController : ApiController
         return Ok(result);
     }
 }
+
+public record StartTestRequest(int StackId);
