@@ -3,6 +3,7 @@ using FinalProject_SeventhSem.Application.Features.Vacancies.Commands.DeleteVaca
 using FinalProject_SeventhSem.Application.Features.Vacancies.Commands.PublishVacancy;
 using FinalProject_SeventhSem.Application.Features.Vacancies.Commands.UpdateVacancy;
 using FinalProject_SeventhSem.Application.Features.Vacancies.Queries.GetOrganizationVacancies;
+using FinalProject_SeventhSem.Application.Features.Vacancies.Queries.GetVacancy;
 using FinalProject_SeventhSem.Application.Features.Vacancies.Queries.GetVacancyById;
 using FinalProject_SeventhSem.Application.Features.Vacancies.Queries.GetVacancyMatches;
 using FinalProject_SeventhSem.Application.Models.Vacancies;
@@ -36,6 +37,16 @@ public class VacanciesController : ApiController
     [ProducesResponseType(typeof(VacancyResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetById(int id, CancellationToken ct)
         => Ok(await Sender.Send(new GetVacancyByIdQuery(id), ct));
+
+
+
+    [HttpGet]
+    [Authorize]
+    [ProducesResponseType(typeof(VacancyResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllVacancy(CancellationToken ct)
+        => Ok(await Sender.Send(new GetVacancyQuery(),ct));
+
+
 
     // ── Organization ───────────────────────────────────────────────────────
 
