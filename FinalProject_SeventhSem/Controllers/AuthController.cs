@@ -14,7 +14,6 @@ namespace FinalProject_SeventhSem.Controllers;
 /// </summary>
 public class AuthController : ApiController
 {
-    /// <summary>Register a new student account.</summary>
     [HttpPost("register/student")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -28,7 +27,6 @@ public class AuthController : ApiController
         return CreatedAtAction(nameof(RegisterStudent), result);
     }
 
-    /// <summary>Register a new organization account (pending admin verification).</summary>
     [HttpPost("register/organization")]
     [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -44,7 +42,6 @@ public class AuthController : ApiController
         return StatusCode(StatusCodes.Status201Created, new { message });
     }
 
-    /// <summary>Login and receive an access token + refresh token pair.</summary>
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -58,7 +55,6 @@ public class AuthController : ApiController
         return Ok(result);
     }
 
-    /// <summary>Exchange a valid refresh token for a new access + refresh token pair.</summary>
     [HttpPost("refresh")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

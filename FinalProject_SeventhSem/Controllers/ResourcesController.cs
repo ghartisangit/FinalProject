@@ -19,10 +19,6 @@ public class ResourcesController : ApiController
     private int CurrentStudentId =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    /// <summary>
-    /// Get personalised resource recommendations.
-    /// Rule-based lookup: weak chapters + missing skills → resources (Algorithm 11).
-    /// </summary>
     [HttpGet("recommended")]
     [ProducesResponseType(typeof(IReadOnlyList<ResourceRecommendationDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetRecommended(CancellationToken ct)
@@ -31,9 +27,6 @@ public class ResourcesController : ApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Rate a learning resource (1–5 stars). One rating per student per resource.
-    /// </summary>
     [HttpPost("{resourceId:int}/rate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -45,7 +45,8 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         //    .FirstOrDefault(u => u.Email == request.Email.ToLower());
 
         var users = await _userRepo.GetAllAsync(
-                include: q => q.Include(u => u.Organization),
+                include: q => q.Include(u => u.Organization)
+                .Include(u=> u.Student),
                 cancellationToken: cancellationToken);
 
         var user = users.FirstOrDefault(u => u.Email == request.Email.ToLower());
@@ -60,7 +61,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         if (user.Role == UserRole.Organization)
         {
             var org = user.Organization;
-            if (org is null || !org.IsVerified)
+            if (org is null || org.Status != OrganizationStatus.Verified)
                 throw new OrganizationNotVerifiedException();
         }
 
@@ -79,7 +80,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
             AccessToken: _jwtService.GenerateAccessToken(user),
             RefreshToken: rawRefresh,
             AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15),
-            User: new UserSummary(user.Id, user.Email, user.Role.ToString()));
+            User: new UserSummary(user.Id, user.Student?.FullName ?? user.Organization?.Name?? string.Empty, user.Email, user.Role.ToString()));
     }
 }
 

@@ -1,4 +1,5 @@
 ﻿using FinalProject_SeventhSem.Domain.Entities;
+using FinalProject_SeventhSem.Domain.Enums;
 using FinalProject_SeventhSem.Domain.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ public record OrganizationSummaryDto(
     string Name,
     string Email,
     string? WebsiteUrl,
-    bool IsVerified,
+    OrganizationStatus Status,
     DateTime CreatedAt
 );
 
@@ -48,7 +49,7 @@ public class GetAllOrganizationsQueryHandler
     cancellationToken: cancellationToken);
 
         var filtered = request.PendingOnly
-            ? orgs.Where(o => !o.IsVerified)
+            ? orgs.Where(o => o.Status != OrganizationStatus.Verified)
             : orgs;
 
         return filtered
@@ -59,7 +60,7 @@ public class GetAllOrganizationsQueryHandler
                 Name: o.Name,
                 Email: o.User.Email,
                 WebsiteUrl: o.WebsiteUrl,
-                IsVerified: o.IsVerified,
+                Status: o.Status,
                 CreatedAt: o.CreatedAt))
             .ToList();
     }

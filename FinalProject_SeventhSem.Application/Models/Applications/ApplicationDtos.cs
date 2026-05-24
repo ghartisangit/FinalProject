@@ -29,6 +29,16 @@ public record ApplicationResponse(
     ApplicationSnapshotDto? MatchSnapshot
 );
 
+public record OrganizationApplicationResponse(
+    int ApplicationId,
+    int VacancyId,
+    string VacancyTitle,
+    int StudentId,
+    string StudentName,
+    string Status,
+    DateTime AppliedAt
+);
+
 /// <summary>
 /// Flattened view of the ApplicationMatchSnapshot stored at apply-time.
 /// </summary>

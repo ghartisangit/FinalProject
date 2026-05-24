@@ -1,5 +1,6 @@
 ﻿using FinalProject_SeventhSem.Application.Features.Applications.Commands.ApplyToVacancy;
 using FinalProject_SeventhSem.Application.Features.Applications.Commands.UpdateApplicationStatus;
+using FinalProject_SeventhSem.Application.Features.Applications.Queries.GetOrganizationApplications;
 using FinalProject_SeventhSem.Application.Features.Applications.Queries.GetRankedCandidates;
 using FinalProject_SeventhSem.Application.Features.Applications.Queries.GetStudentApplications;
 using FinalProject_SeventhSem.Application.Models.Applications;
@@ -22,9 +23,6 @@ public class ApplicationsController : ApiController
     private int CurrentUserId =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    // ── Student ────────────────────────────────────────────────────────────
-
-    /// <summary>Apply to a published vacancy. Captures immutable match snapshot (Algorithms 3–6).</summary>
     [HttpPost]
     [Authorize(Roles = "Student")]
     [ProducesResponseType(typeof(ApplicationResponse), StatusCodes.Status201Created)]
@@ -36,7 +34,6 @@ public class ApplicationsController : ApiController
         return StatusCode(StatusCodes.Status201Created, result);
     }
 
-    /// <summary>Get all applications submitted by the authenticated student.</summary>
     [HttpGet("mine")]
     [Authorize(Roles = "Student")]
     [ProducesResponseType(typeof(IReadOnlyList<ApplicationResponse>), StatusCodes.Status200OK)]
@@ -46,9 +43,6 @@ public class ApplicationsController : ApiController
         return Ok(result);
     }
 
-    // ── Organization ───────────────────────────────────────────────────────
-
-    /// <summary>Get ranked candidates for a vacancy — Algorithm 12. Owner org only.</summary>
     [HttpGet("vacancies/{vacancyId:int}/ranked")]
     [Authorize(Roles = "Organization")]
     [ProducesResponseType(typeof(RankedCandidateListResponse), StatusCodes.Status200OK)]
@@ -59,7 +53,31 @@ public class ApplicationsController : ApiController
         return Ok(result);
     }
 
-    /// <summary>Update application status. Only the owning Organization may call this.</summary>
+
+    // GET /organization/applications  — all applications across all vacancies
+    [HttpGet("applications")]
+    [Authorize(Roles = "Organization")]
+    [ProducesResponseType(typeof(IReadOnlyList<OrganizationApplicationResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetOrganizationApplications(CancellationToken ct)
+    {
+        var result = await Sender.Send(new GetOrganizationApplicationsQuery(CurrentUserId), ct);
+        return Ok(result);
+    }
+
+    // GET /organization/vacancies/{vacancyId}/applications  — applications for a specific vacancy
+    [HttpGet("vacancies/{vacancyId:int}/applications")]
+    [Authorize(Roles = "Organization")]
+    [ProducesResponseType(typeof(IReadOnlyList<OrganizationApplicationResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetApplicationsByVacancy(int vacancyId, CancellationToken ct)
+    {
+        var result = await Sender.Send(new GetApplicationsByVacancyQuery(vacancyId, CurrentUserId), ct);
+        return Ok(result);
+    }
+
+
     [HttpPatch("{applicationId:int}/status")]
     [Authorize(Roles = "Organization")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

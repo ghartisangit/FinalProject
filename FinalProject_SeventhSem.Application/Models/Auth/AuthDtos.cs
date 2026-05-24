@@ -39,6 +39,7 @@ public record AuthResponse(
 
 public record UserSummary(
     int UserId,
+    string fullName,
     string Email,
     string Role
 );

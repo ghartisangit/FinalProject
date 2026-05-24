@@ -29,14 +29,6 @@ public class TestsController : ApiController
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
 
-    /// <summary>Get all available stacks the student can choose from before starting a test.</summary>
-    //[HttpGet("stacks")]
-    //[ProducesResponseType(typeof(IReadOnlyList<StackDto>), StatusCodes.Status200OK)]
-    //public async Task<IActionResult> GetAvailableStacks(CancellationToken ct)
-    //{
-    //    var result = await Sender.Send(new GetAvailableStacksQuery(), ct);
-    //    return Ok(result);
-    //}
     /// <summary>Start a new test session — Algorithm 7 (Round-Robin Question Selection).</summary>
     [HttpPost("start")]
     [ProducesResponseType(typeof(TestSessionResponse), StatusCodes.Status201Created)]

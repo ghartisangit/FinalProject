@@ -12,7 +12,6 @@ public record SubmitAnswerRequest(
     string SelectedOption   // "A" | "B" | "C" | "D"
 );
 
-/// <summary>Explicit final submission request (also triggered automatically on expiry).</summary>
 public record SubmitTestRequest(
     int TestId
 );

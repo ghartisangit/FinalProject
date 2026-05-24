@@ -13,7 +13,7 @@ public record CreateVacancyRequest(
      DateTime ApplicationDeadline,
     EducationLevel? RequiredEducationLevel,
     string? RequiredFieldOfStudy,
-    IReadOnlyList<int> RequiredSkillIds,   // Must have at least 1 → enforced by FluentValidation
+    IReadOnlyList<int> RequiredSkillIds,   
     IReadOnlyList<int>? OptionalSkillIds
 );
 
@@ -27,7 +27,6 @@ public record UpdateVacancyRequest(
     IReadOnlyList<int>? OptionalSkillIds
 );
 
-// ── Responses ─────────────────────────────────────────────────────────────────
 
 public record VacancyResponse(
     int VacancyId,
@@ -39,7 +38,7 @@ public record VacancyResponse(
     
     DateTime? PublishedAt,
     DateTime? ApplicationDeadline,
-    bool IsDeadlinePassed,              // ← computed: DateTime.UtcNow > ApplicationDeadline
+    bool IsDeadlinePassed,             
     int? DaysRemaining,
     string? RequiredEducationLevel,
     string? RequiredFieldOfStudy,

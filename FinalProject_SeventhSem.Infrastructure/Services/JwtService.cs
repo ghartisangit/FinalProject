@@ -58,7 +58,7 @@ public class JwtService : IJwtService
                 ValidIssuer = _settings.Issuer,
                 ValidateAudience = true,
                 ValidAudience = _settings.Audience,
-                ValidateLifetime = false   // allow expired for refresh flow
+                ValidateLifetime = false   
             };
 
             var principal = handler.ValidateToken(token, parameters, out _);

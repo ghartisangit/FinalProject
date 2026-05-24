@@ -80,7 +80,7 @@ public class RegisterStudentCommandHandler
             AccessToken: _jwtService.GenerateAccessToken(user),
             RefreshToken: rawRefresh,
             AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15),
-            User: new UserSummary(user.Id, user.Email, user.Role.ToString()));
+            User: new UserSummary(user.Id, user.Student?.FullName ?? user.Organization?.Name?? string.Empty, user.Email, user.Role.ToString()));
     }
 }
 

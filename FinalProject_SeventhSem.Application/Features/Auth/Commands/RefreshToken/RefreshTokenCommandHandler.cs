@@ -86,6 +86,6 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
             AccessToken: _jwtService.GenerateAccessToken(user),
             RefreshToken: rawNew,
             AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15),
-            User: new UserSummary(user.Id, user.Email, user.Role.ToString()));
+            User: new UserSummary(user.Id,user.Student?.FullName ?? user.Organization?.Name?? string.Empty, user.Email, user.Role.ToString()));
     }
 }

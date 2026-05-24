@@ -56,7 +56,7 @@ public class RegisterOrganizationCommandHandler
             UserId = user.Id,
             Name = request.OrganizationName,
             WebsiteUrl = request.WebsiteUrl,
-            IsVerified = false
+            Status = OrganizationStatus.Pending
         };
         await _orgRepo.AddAsync(org, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);

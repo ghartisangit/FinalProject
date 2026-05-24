@@ -29,13 +29,11 @@ public class FileStorageService : IFileStorageService
         var uniqueName = $"{Guid.NewGuid()}_{Path.GetFileName(fileName)}";
         var fullPath = Path.Combine(dir, uniqueName);
 
-        // Reset stream position in case it was already read
         if (fileStream.CanSeek) fileStream.Seek(0, SeekOrigin.Begin);
 
         await using var output = File.Create(fullPath);
         await fileStream.CopyToAsync(output, ct);
 
-        // Return a relative URL path (served by the Presentation layer as static files)
         return $"/uploads/{folder}/{uniqueName}";
     }
 
@@ -43,7 +41,6 @@ public class FileStorageService : IFileStorageService
     {
         if (string.IsNullOrWhiteSpace(fileUrl)) return Task.CompletedTask;
 
-        // Convert relative URL back to absolute path
         var relativePath = fileUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
         var fullPath = Path.Combine(_basePath, relativePath.Replace("uploads" + Path.DirectorySeparatorChar, ""));
 

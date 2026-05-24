@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Infrastructure.Seeders;
@@ -55,7 +56,6 @@ public class DatabaseSeeder
         _logger.LogInformation("Database seeder complete.");
     }
 
-    // ── 1. Admin ──────────────────────────────────────────────────────────
 
     private async Task SeedAdminAsync(CancellationToken ct)
     {
@@ -92,14 +92,12 @@ public class DatabaseSeeder
             return;
         }
 
-        // skill name → aliases[]
         var skillData = new Dictionary<string, string[]>
         {
-            // ── Languages ──────────────────────────────────────────────
             ["C#"] = ["csharp", "c-sharp", "dotnet-csharp"],
-            ["C"] = ["clang", "c-language", "c-programming"],      // ← add this
+            ["C"] = ["clang", "c-language", "c-programming"],      
             ["C++"] = ["cplusplus", "cpp", "c-plus-plus", "cplus"],
-            ["JavaScript"] = ["js", "javascript", "ecmascript"],
+            ["JavaScript"] = ["js", "javascript","javascripts(basics)", "ecmascript"],
             ["TypeScript"] = ["ts", "typescript"],
             ["Python"] = ["python3", "py"],
             ["Java"] = ["java8", "java11", "java17"],
@@ -107,8 +105,12 @@ public class DatabaseSeeder
             ["HTML"] = ["html5"],
             ["CSS"] = ["css3", "stylesheet"],
 
-            // ── Frameworks / Libraries ────────────────────────────────
-            ["ASP.NET Core"] = ["aspnet", "aspnetcore", "asp-net-core", "dotnet-web", "ASP.NET Core Web API","ASP.NET Core MVC"],
+            ["ASP.NET Core"] = ["aspnet", "aspnetcore", "asp-net-core", "dotnet-web"],
+
+            ["ASP.NET Core Web API"] = ["aspnetcorewebapi", "asp-net-core-web-api"], 
+
+            ["ASP.NET Core MVC"] = ["aspnetcoremvc", "asp-net-core-mvc"],
+            //["ASP.NET Core"] = ["aspnet", "aspnetcore", "asp-net-core", "dotnet-web", "ASP.NET Core Web API","ASP.NET Core MVC"],
             ["Entity Framework Core"] = ["ef", "efcore", "entity-framework"],
             ["React"] = ["reactjs", "react-js"],
             ["React Native"] = ["react-native", "rn", "expo", "cross-platform-mobile", "mobile-react"],
@@ -123,7 +125,6 @@ public class DatabaseSeeder
             ["Spring Boot"] = ["spring", "springboot", "spring-framework"],
             ["Laravel"] = ["php-laravel"],
 
-            // ── Databases ─────────────────────────────────────────────
             ["SQL Server"] = ["mssql-server", "sqlserver", "ms-sql"],
             ["PostgreSQL"] = ["postgres", "postgresql", "psql"],
             ["MySQL"] = ["mysql-db"],
@@ -131,17 +132,15 @@ public class DatabaseSeeder
             ["Redis"] = ["redis-cache"],
             ["SQLite"] = ["sqlite3"],
 
-            // ── DevOps / Tools ────────────────────────────────────────
             ["Docker"] = ["docker-container", "containerization"],
             ["Git"] = ["git-scm", "version-control"],
             ["GitHub"] = ["github-actions"],
-            ["REST API"] = ["restapi", "rest", "restful", "web-api"],
+            ["REST API"] = ["restapi", "rest", "restful","restfuls", "web-api"],
             ["GraphQL"] = ["graphql-api"],
             ["Postman"] = ["api-testing"],
             ["Visual Studio"] = ["vs2022", "visual-studio"],
             ["VS Code"] = ["vscode", "visual-studio-code"],
 
-            // ── Architecture / Patterns ───────────────────────────────
             ["Clean Architecture"] = ["clean-arch", "onion-architecture"],
             ["CQRS"] = ["command-query", "cqrs-pattern"],
             ["Repository Pattern"] = ["repository", "repo-pattern"],
@@ -149,11 +148,9 @@ public class DatabaseSeeder
             ["Microservices"] = ["microservice", "micro-services"],
             ["SOLID Principles"] = ["solid", "solid-design"],
 
-            // ── Testing ───────────────────────────────────────────────
             ["Unit Testing"] = ["unit-test", "xunit", "nunit", "mstest"],
             ["Integration Testing"] = ["integration-test"],
 
-            // ── Other ─────────────────────────────────────────────────
             ["Linux"] = ["ubuntu", "linux-os", "bash"],
             ["Agile"] = ["scrum", "agile-methodology", "kanban"],
             ["JWT"] = ["json-web-token", "jwt-auth", "bearer-token", "jws", "jwt-claims"],
@@ -164,7 +161,7 @@ public class DatabaseSeeder
         {
             var skill = new Skill { Name = skillName, CreatedAt = DateTime.UtcNow };
             _context.Skills.Add(skill);
-            await _context.SaveChangesAsync(ct); // flush to get Id
+            await _context.SaveChangesAsync(ct); 
 
             foreach (var alias in aliases)
             {
@@ -181,7 +178,33 @@ public class DatabaseSeeder
         _logger.LogInformation("Seeded {Count} skills.", skillData.Count);
     }
 
-    // ── 3. Stacks → Chapters → Questions ──────────────────────────────────
+
+
+
+    public string PreprocessText(string rawText)
+    {
+        if (string.IsNullOrWhiteSpace(rawText)) return string.Empty;
+
+        var text = Regex.Replace(rawText, @"-\s*\n\s*", "");
+
+        text = Regex.Replace(text, @"[\r\n]+", " ");
+
+        text = Regex.Replace(text, @"\bC#(?!\w)", "csharp", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bC\+\+(?!\w)", "cplusplus", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\b\.NET\b", "dotnet", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bASP\.NET\b", "aspnetcore", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bNode\.js\b", "nodejs", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bVue\.js\b", "vuejs", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bExpress\.js\b", "expressjs", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bNext\.js\b", "nextjs", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"\bC\b", "clang"); 
+
+        text = Regex.Replace(text, @"[^a-zA-Z0-9\s]", " ");
+
+        text = Regex.Replace(text, @"\s{2,}", " ");
+
+        return text.ToLowerInvariant().Trim();
+    }
 
     private async Task SeedStacksChaptersQuestionsAsync(CancellationToken ct)
     {
@@ -231,7 +254,6 @@ public class DatabaseSeeder
         _logger.LogInformation("Seeded stacks, chapters, and questions.");
     }
 
-    // ── 4. Learning Resources ─────────────────────────────────────────────
 
     private async Task SeedResourcesAsync(CancellationToken ct)
     {
@@ -241,7 +263,6 @@ public class DatabaseSeeder
             return;
         }
 
-        // Fetch skill ids by name for mapping
         var skills = await _context.Skills.ToListAsync(ct);
         int? SkillId(string name) =>
             skills.FirstOrDefault(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Id;
@@ -301,7 +322,6 @@ public class DatabaseSeeder
         _logger.LogInformation("Seeded {Count} resources.", resources.Length);
     }
 
-    // ── Question seed data ─────────────────────────────────────────────────
 
     private record QuestionData(string Text, string A, string B, string C, string D, string Correct);
 
@@ -309,7 +329,6 @@ public class DatabaseSeeder
     {
         return new Dictionary<string, Dictionary<string, QuestionData[]>>
         {
-            // ═══════════════════════════════════════════════════
             [".NET"] = new()
             {
                 ["C# Basics"] = new[]
@@ -391,7 +410,6 @@ public class DatabaseSeeder
                 },
             },
 
-            // ═══════════════════════════════════════════════════
             ["JavaScript"] = new()
             {
                 ["JS Fundamentals"] = new[]
@@ -467,7 +485,6 @@ public class DatabaseSeeder
                 },
             },
 
-            // ═══════════════════════════════════════════════════
             ["Python"] = new()
             {
                 ["Python Basics"] = new[]
@@ -519,7 +536,6 @@ public class DatabaseSeeder
                 },
             },
 
-            // ═══════════════════════════════════════════════════
             ["Database"] = new()
             {
                 ["SQL Fundamentals"] = new[]
@@ -568,7 +584,6 @@ public class DatabaseSeeder
                 },
             },
 
-            // ═══════════════════════════════════════════════════
             ["Web Development"] = new()
             {
                 ["HTML & CSS"] = new[]

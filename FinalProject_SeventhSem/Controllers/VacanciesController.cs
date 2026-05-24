@@ -96,15 +96,7 @@ public class VacanciesController : ApiController
         return Ok(result);
     }
 
-    /// <summary>Publish a draft vacancy. Guard: must have ≥1 required skill.</summary>
-    //[HttpPost("{id:int}/publish")]
-    //[Authorize(Roles = "Organization")]
-    //[ProducesResponseType(StatusCodes.Status204NoContent)]
-    //public async Task<IActionResult> Publish(int id, CancellationToken ct)
-    //{
-    //    await Sender.Send(new PublishVacancyCommand(id, CurrentUserId), ct);
-    //    return NoContent();
-    //}
+ 
 
 
     /// <summary>Delete a vacancy owned by the authenticated organization.</summary>

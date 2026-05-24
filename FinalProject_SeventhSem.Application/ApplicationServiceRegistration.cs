@@ -18,20 +18,16 @@ public static class ApplicationServiceRegistration
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // MediatR — auto-registers all IRequestHandler<,> in this assembly
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(ApplicationServiceRegistration).Assembly));
 
-        // FluentValidation — auto-registers all AbstractValidator<> in this assembly
         services.AddValidatorsFromAssembly(
             typeof(ApplicationServiceRegistration).Assembly,
             includeInternalTypes: true);
 
-        // Pipeline behaviors (order matters: Logging → Validation → Handler)
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
-        // Strongly typed settings
         services.Configure<JwtSettings>(
             configuration.GetSection(JwtSettings.SectionName));
 

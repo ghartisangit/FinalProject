@@ -26,10 +26,8 @@ public static class InfrastructureServiceRegistration
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // ── Audit interceptor (singleton — stateless) ──────────────────────
         services.AddScoped<AuditInterceptor>();
 
-        // ── EF Core DbContext ──────────────────────────────────────────────
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
             options.UseSqlServer(
@@ -40,33 +38,26 @@ public static class InfrastructureServiceRegistration
             options.AddInterceptors(sp.GetRequiredService<AuditInterceptor>());
         });
 
-        // IUnitOfWork is satisfied by AppDbContext (already scoped)
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
 
-        // ── Generic repository ─────────────────────────────────────────────
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
-        // ── Auth & security services ───────────────────────────────────────
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IJwtService, JwtService>();
 
-        // ── Current user (HTTP-context-bound) ─────────────────────────────
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-        // ── File storage ───────────────────────────────────────────────────
         var uploadsPath = configuration["FileStorage:BasePath"]
             ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
 
         services.AddScoped<IFileStorageService>(_ => new FileStorageService(uploadsPath));
 
-        // ── Core engines ───────────────────────────────────────────────────
         services.AddScoped<IResumeParsingService, ResumeParsingEngine>();
         services.AddScoped<IMatchingService, MatchingEngine>();
         services.AddScoped<IScoringService, ScoringEngine>();
 
-        // ── Database seeder ────────────────────────────────────────────────
         services.AddScoped<FinalProject_SeventhSem.Infrastructure.Seeders.DatabaseSeeder>();
 
         return services;
