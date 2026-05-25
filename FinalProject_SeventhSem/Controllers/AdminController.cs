@@ -4,6 +4,7 @@ using FinalProject_SeventhSem.Application.Features.Admin.Commands.ManageResource
 using FinalProject_SeventhSem.Application.Features.Admin.Commands.ManageSkill;
 using FinalProject_SeventhSem.Application.Features.Admin.Commands.ManageStack;
 using FinalProject_SeventhSem.Application.Features.Admin.Commands.VerifyOrganization;
+using FinalProject_SeventhSem.Application.Features.Admin.Queries.GetAdminDashboard;
 using FinalProject_SeventhSem.Application.Features.Admin.Queries.GetAllOrganizations;
 using FinalProject_SeventhSem.Application.Models.Skills;
 using FinalProject_SeventhSem.Application.Models.Stacks;
@@ -42,6 +43,12 @@ public class AdminController : ApiController
     //   var result =  await Sender.Send(new VerifyOrganizationCommand(organizationId), ct);
     //    return Ok(result);
     //}
+
+
+    [HttpGet("dashboard")]
+    [ProducesResponseType(typeof(AdminDashboardSummaryResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetSummaryStats(CancellationToken ct)
+        => Ok(await Sender.Send(new GetAdminDashboardSummaryQuery(), ct));
     public record VerifyOrganizationRequest(OrganizationStatus Status, string? Reason = null);
 
     [HttpPut("organizations/{organizationId:int}/status")]
@@ -79,6 +86,7 @@ public class AdminController : ApiController
         await Sender.Send(new DeleteSkillAliasCommand(aliasId), ct);
         return NoContent();
     }
+
     [HttpGet("stacks")]
     [ProducesResponseType(typeof(IReadOnlyList<StackResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStacks(CancellationToken ct)
@@ -147,27 +155,36 @@ public class AdminController : ApiController
     public async Task<IActionResult> GetQuestionsByStack(int stackId, CancellationToken ct)
         => Ok(await Sender.Send(new GetQuestionsByStackQuery(stackId), ct));
 
+
+
     [HttpPost("questions")]
     [ProducesResponseType(typeof(QuestionResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateQuestion(
-        [FromBody] CreateQuestionRequest request, CancellationToken ct)
-        => StatusCode(StatusCodes.Status201Created,
-            await Sender.Send(new CreateQuestionCommand(
-                request.ChapterId, request.Text, request.OptionA, request.OptionB,
-                request.OptionC, request.OptionD, request.CorrectOption), ct));
+    [FromBody] CreateQuestionRequest request, CancellationToken ct)
+    => StatusCode(StatusCodes.Status201Created,
+        await Sender.Send(new CreateQuestionCommand(
+            request.StackId, request.ChapterId, request.Text, request.OptionA, request.OptionB,
+            request.OptionC, request.OptionD, request.CorrectOption), ct));
 
+    [HttpPatch("questions/{questionId:int}")]
+    [ProducesResponseType(typeof(QuestionResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> PatchQuestion(
+    int questionId, [FromBody] PatchQuestionRequest request, CancellationToken ct)
+    => Ok(await Sender.Send(new PatchQuestionCommand(
+        questionId, request.Text, request.OptionA, request.OptionB,
+        request.OptionC, request.OptionD, request.CorrectOption), ct));
 
 
     [HttpDelete("questions/{questionId:int}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteQuestion(int questionId, CancellationToken ct)
     {
         await Sender.Send(new DeleteQuestionCommand(questionId), ct);
-        return NoContent();
+        return Ok($"{questionId} deleted successfully");
     }
 
 
-
+    
 
 
     //[HttpGet("resources")]

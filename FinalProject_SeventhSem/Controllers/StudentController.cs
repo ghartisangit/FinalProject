@@ -1,8 +1,10 @@
-﻿using FinalProject_SeventhSem.Application.Features.Students.Commands.SetStudentSkills;
+﻿using FinalProject_SeventhSem.Application.Features.Admin.Commands.ManageStack;
+using FinalProject_SeventhSem.Application.Features.Students.Commands.SetStudentSkills;
 using FinalProject_SeventhSem.Application.Features.Students.Commands.UpdateStudentProfile;
 using FinalProject_SeventhSem.Application.Features.Students.Commands.UploadProfilePhoto;
 using FinalProject_SeventhSem.Application.Features.Students.Queries.GetStudentDashboard;
 using FinalProject_SeventhSem.Application.Features.Students.Queries.GetStudentProfile;
+using FinalProject_SeventhSem.Application.Models.Stacks;
 using FinalProject_SeventhSem.Application.Models.Students;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -70,4 +72,10 @@ public class StudentController : ApiController
             new UploadProfilePhotoCommand(CurrentUserId, stream, file.FileName), ct);
         return Ok(new { photoUrl = url });
     }
+
+
+    [HttpGet("stacks")]
+    [ProducesResponseType(typeof(IReadOnlyList<StackResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetStacks(CancellationToken ct)
+       => Ok(await Sender.Send(new GetAllStacksQuery(), ct));
 }

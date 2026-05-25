@@ -79,10 +79,25 @@ public class ApplyToVacancyCommandHandler : IRequestHandler<ApplyToVacancyComman
                 $"This vacancy is no longer accepting applications.");
 
         // Duplicate application check
-        var existing = (await _applicationRepo.GetAllAsync(cancellationToken))
-            .FirstOrDefault(a => a.StudentId == request.StudentId && a.VacancyId == request.VacancyId);
+        //var existing = (await _applicationRepo.GetAllAsync(cancellationToken))
+        //    .FirstOrDefault(a => a.StudentId == request.StudentId && a.VacancyId == request.VacancyId);
+        //if (existing is not null)
+        //    throw new AlreadyAppliedException("You have already applied to this vacancy.");
+
+
+
+        // Duplicate application check
+        var existing = await _applicationRepo.GetAsync(
+            predicate: a => a.StudentId == student.Id && a.VacancyId == vacancy.Id,
+            cancellationToken: cancellationToken);
+
         if (existing is not null)
-            throw new ConflictException("You have already applied to this vacancy.");
+        {
+            throw new BadRequestException("You have already applied to this vacancy.");
+        }
+
+
+        //throw new ConflictException("You have already applied to this vacancy.");
 
         // Run matching algorithms 3–6 and snapshot the result
         var matchResult = _matching.Match(student, vacancy);

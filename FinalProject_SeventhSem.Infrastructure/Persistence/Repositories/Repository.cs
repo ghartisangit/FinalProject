@@ -71,5 +71,15 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
 
     public void Remove(T entity)
         => _dbSet.Remove(entity);
+
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Set<T>().CountAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        return await _context.Set<T>().CountAsync(predicate, cancellationToken);
+    }
 }
 
