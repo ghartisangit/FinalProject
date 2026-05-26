@@ -34,7 +34,7 @@ public class FileStorageService : IFileStorageService
         await using var output = File.Create(fullPath);
         await fileStream.CopyToAsync(output, ct);
 
-        return $"/uploads/{folder}/{uniqueName}";
+        return $"/{folder}/{uniqueName}";
     }
 
     public Task DeleteAsync(string fileUrl, CancellationToken ct = default)
