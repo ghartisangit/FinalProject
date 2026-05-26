@@ -39,11 +39,6 @@ public class GetRankedCandidatesQueryHandler
     public async Task<RankedCandidateListResponse> Handle(
         GetRankedCandidatesQuery request, CancellationToken cancellationToken)
     {
-        //var vacancy = await _vacancyRepo.GetByIdAsync(request.VacancyId, cancellationToken)
-        //    ?? throw new NotFoundException(nameof(Vacancy), request.VacancyId);
-
-        //if (vacancy.OrganizationId != request.OrganizationId)
-        //    throw new UnauthorizedException("You do not own this vacancy.");
 
         var organization = (await _organizationRepo.GetAllAsync(cancellationToken))
           .FirstOrDefault(o => o.UserId == request.UserId)
@@ -52,23 +47,10 @@ public class GetRankedCandidatesQueryHandler
         var vacancy = await _vacancyRepo.GetByIdAsync(request.VacancyId, cancellationToken)
             ?? throw new NotFoundException(nameof(Vacancy), request.VacancyId);
 
-        // ✅ Now comparing org.Id (1) against vacancy.OrganizationId (1) — matches!
         if (vacancy.OrganizationId != organization.Id)
             throw new UnauthorizedException("You do not own this vacancy.");
 
-        //var applications = (await _applicationRepo.GetAllAsync(cancellationToken))
-        //    .Where(a => a.VacancyId == request.VacancyId && a.MatchSnapshot != null)
-        //    .ToList();
-
-        //var allTestResults = await _testResultRepo.GetAllAsync(cancellationToken);
-        //var latestScores = allTestResults
-        //    .Where(tr => tr.IsLatest)
-        //    .ToDictionary(tr => tr.StudentId, tr => tr.Score);
-
-        //// Eligibility filter
-        //var eligible = applications
-        //    .Where(a => a.MatchSnapshot!.RequirementFit >= 60)
-        //    .ToList();
+     
 
         var applications = await _applicationRepo.GetAllAsync(
            q => q
@@ -82,12 +64,10 @@ public class GetRankedCandidatesQueryHandler
             .Where(tr => tr.IsLatest)
             .ToDictionary(tr => tr.StudentId, tr => tr.Score);
 
-        // Eligibility filter — only apps that have a snapshot AND meet the threshold
         var eligible = applications
             .Where(a => a.MatchSnapshot != null && a.MatchSnapshot.RequirementFit >= 10)
             .ToList();
 
-        // Score and rank
         var ranked = eligible
             .Select(a =>
             {

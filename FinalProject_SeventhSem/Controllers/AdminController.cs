@@ -6,6 +6,7 @@ using FinalProject_SeventhSem.Application.Features.Admin.Commands.ManageStack;
 using FinalProject_SeventhSem.Application.Features.Admin.Commands.VerifyOrganization;
 using FinalProject_SeventhSem.Application.Features.Admin.Queries.GetAdminDashboard;
 using FinalProject_SeventhSem.Application.Features.Admin.Queries.GetAllOrganizations;
+using FinalProject_SeventhSem.Application.Features.Admin.Queries.GetAllStudents;
 using FinalProject_SeventhSem.Application.Models.Skills;
 using FinalProject_SeventhSem.Application.Models.Stacks;
 using FinalProject_SeventhSem.Domain.Enums;
@@ -21,6 +22,17 @@ namespace FinalProject_SeventhSem.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminController : ApiController
 {
+
+    [HttpGet("dashboard")]
+    [ProducesResponseType(typeof(AdminDashboardSummaryResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetSummaryStats(CancellationToken ct)
+        => Ok(await Sender.Send(new GetAdminDashboardSummaryQuery(), ct));
+
+    [HttpGet("students")]
+    [ProducesResponseType(typeof(IReadOnlyList<StudentSummaryDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetStudents(CancellationToken ct = default)
+    => Ok(await Sender.Send(new GetAllStudentsQuery(), ct));
+
     [HttpGet("organizations")]
     [ProducesResponseType(typeof(IReadOnlyList<OrganizationSummaryDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrganizations(
@@ -38,10 +50,7 @@ public class AdminController : ApiController
     //}
 
 
-    [HttpGet("dashboard")]
-    [ProducesResponseType(typeof(AdminDashboardSummaryResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetSummaryStats(CancellationToken ct)
-        => Ok(await Sender.Send(new GetAdminDashboardSummaryQuery(), ct));
+    
     public record VerifyOrganizationRequest(OrganizationStatus Status, string? Reason = null);
 
     [HttpPut("organizations/{organizationId:int}/status")]

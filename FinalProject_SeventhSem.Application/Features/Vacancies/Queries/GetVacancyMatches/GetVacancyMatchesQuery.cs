@@ -19,5 +19,4 @@ namespace FinalProject_SeventhSem.Application.Features.Vacancies.Queries.GetVaca
 /// </summary>
 public record GetVacancyMatchesQuery(int StudentId) : IRequest<IReadOnlyList<VacancyMatchResult>>;
 
-// ── Handler ───────────────────────────────────────────────────────────────────
 

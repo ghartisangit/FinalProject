@@ -33,8 +33,6 @@ public class GetVacancyMatchesQueryHandler
     public async Task<IReadOnlyList<VacancyMatchResult>> Handle(
         GetVacancyMatchesQuery request, CancellationToken cancellationToken)
     {
-        //var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
-        //    ?? throw new NotFoundException(nameof(Student), request.StudentId);
 
         var student = await _studentRepo.GetAsync(
     predicate: s => s.UserId == request.StudentId,
@@ -43,10 +41,6 @@ public class GetVacancyMatchesQueryHandler
     ?? throw new NotFoundException(nameof(Student), request.StudentId);
 
 
-        //var vacancies = (await _vacancyRepo.GetAllAsync(cancellationToken))
-        //    .Where(v => v.IsPublished
-        //             && DateTime.UtcNow <= v.ApplicationDeadline)  // ← exclude passed deadline
-        //    .ToList();
 
         var vacancies = (await _vacancyRepo.GetAllAsync(
                 include: q => q
