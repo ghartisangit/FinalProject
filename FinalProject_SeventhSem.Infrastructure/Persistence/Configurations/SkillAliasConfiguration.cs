@@ -16,7 +16,6 @@ public class SkillAliasConfiguration : IEntityTypeConfiguration<SkillAlias>
         builder.HasKey(a => a.Id);
         builder.Property(a => a.Alias).IsRequired().HasMaxLength(100);
 
-        // Guard 3: one alias cannot map to more than one SkillId
         builder.HasIndex(a => a.Alias).IsUnique();
     }
 }

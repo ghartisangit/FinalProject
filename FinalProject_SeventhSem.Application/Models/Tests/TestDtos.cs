@@ -9,19 +9,13 @@ namespace FinalProject_SeventhSem.Application.Models.Tests;
 public record SubmitAnswerRequest(
     int TestId,
     int QuestionId,
-    string SelectedOption   // "A" | "B" | "C" | "D"
+    string SelectedOption   
 );
 
 public record SubmitTestRequest(
     int TestId
 );
 
-// ── Responses ─────────────────────────────────────────────────────────────────
-
-/// <summary>
-/// Returned when a new test session is started.
-/// Contains questions selected by Algorithm 7 (Round-Robin).
-/// </summary>
 public record TestSessionResponse(
     int TestId,
     DateTime StartedAt,
@@ -40,9 +34,6 @@ public record TestQuestionDto(
     string StackName
 );
 
-/// <summary>
-/// Returned after test submission. Aggregates Algorithms 8–11 outputs.
-/// </summary>
 public record TestResultResponse(
     int TestId,
     double Score,                                       // Algorithm 8
@@ -53,13 +44,12 @@ public record TestResultResponse(
     IReadOnlyList<ResourceRecommendationDto> RecommendedResources // Algorithm 11
 );
 
-/// <summary>Per-chapter score breakdown. Output of Algorithm 9.</summary>
 public record ChapterScoreDto(
     int ChapterId,
     string ChapterName,
     string StackName,
     double ScorePercent,
-    bool IsWeak            // true if ScorePercent < WeakChapterMaxPercent (Algorithm 10)
+    bool IsWeak            
 );
 
 /// <summary>A single resource recommended by Algorithm 11.</summary>
@@ -68,6 +58,6 @@ public record ResourceRecommendationDto(
     string Title,
     string Url,
     string? ResourceType,
-    string RecommendedBecause  // e.g. "Weak chapter: EF Core" | "Missing skill: Docker"
+    string RecommendedBecause  
 );
 

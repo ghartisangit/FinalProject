@@ -16,10 +16,8 @@ public class Organization : BaseEntity
     public string? Description { get; set; }
     public string? WebsiteUrl { get; set; }
     public string? LogoUrl { get; set; }
-    //public bool IsVerified { get; set; } = false;
     public OrganizationStatus Status { get; set; } = OrganizationStatus.Pending;
 
-    // Navigation
     public User User { get; set; } = null!;
     public ICollection<Vacancy> Vacancies { get; set; } = new List<Vacancy>();
 }

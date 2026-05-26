@@ -16,7 +16,6 @@ public class Test : BaseEntity
     public DateTime? SubmittedAt { get; set; }
     public TestStatus Status { get; set; } = TestStatus.InProgress;
 
-    // Navigation
     public Student Student { get; set; } = null!;
     public ICollection<TestAnswer> Answers { get; set; } = new List<TestAnswer>();
     public TestResult? Result { get; set; }

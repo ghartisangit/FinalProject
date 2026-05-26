@@ -11,6 +11,5 @@ public class Stack : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
 
-    // Navigation
     public ICollection<Chapter> Chapters { get; set; } = new List<Chapter>();
 }

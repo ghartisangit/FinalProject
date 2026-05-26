@@ -15,7 +15,6 @@ public class User : BaseEntity
     public UserRole Role { get; set; }
     public bool IsActive { get; set; } = true;
 
-    // Navigation
     public Student? Student { get; set; }
     public Organization? Organization { get; set; }
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();

@@ -13,11 +13,6 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Infrastructure.Persistence.Interceptors;
 
-/// <summary>
-/// EF Core SaveChanges interceptor that automatically writes AuditLog entries
-/// for every Created / Updated / Deleted entity that inherits BaseEntity.
-/// Registered as a singleton in DI and injected into AppDbContext options.
-/// </summary>
 public class AuditInterceptor : SaveChangesInterceptor
 {
     private readonly ICurrentUserService _currentUser;
@@ -54,7 +49,6 @@ public class AuditInterceptor : SaveChangesInterceptor
 
         foreach (var entry in auditEntries)
         {
-            // Skip AuditLog itself to avoid infinite loops
             if (entry.Entity is AuditLog) continue;
 
             var action = entry.State switch

@@ -13,9 +13,7 @@ using System.Security.Claims;
 namespace FinalProject_SeventhSem.Controllers;
 
 
-/// <summary>
-/// Student applications and organization-side candidate ranking (Algorithm 12).
-/// </summary>
+
 
 
 public class ApplicationsController : ApiController
@@ -54,7 +52,6 @@ public class ApplicationsController : ApiController
     }
 
 
-    // GET /organization/applications  — all applications across all vacancies
     [HttpGet("applications")]
     [Authorize(Roles = "Organization")]
     [ProducesResponseType(typeof(IReadOnlyList<OrganizationApplicationResponse>), StatusCodes.Status200OK)]
@@ -65,7 +62,6 @@ public class ApplicationsController : ApiController
         return Ok(result);
     }
 
-    // GET /organization/vacancies/{vacancyId}/applications  — applications for a specific vacancy
     [HttpGet("vacancies/{vacancyId:int}/applications")]
     [Authorize(Roles = "Organization")]
     [ProducesResponseType(typeof(IReadOnlyList<OrganizationApplicationResponse>), StatusCodes.Status200OK)]

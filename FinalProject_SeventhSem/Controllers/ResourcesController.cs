@@ -9,10 +9,6 @@ using System.Security.Claims;
 namespace FinalProject_SeventhSem.Controllers;
 
 
-
-/// <summary>
-/// Learning resource recommendations (Algorithm 11) and student ratings.
-/// </summary>
 [Authorize(Roles = "Student")]
 public class ResourcesController : ApiController
 {

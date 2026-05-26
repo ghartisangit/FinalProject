@@ -18,19 +18,15 @@ public class Student : BaseEntity
     public string? Nationality { get; set; }
     public string? Location { get; set; }
 
-    // Education
     public EducationLevel? EducationLevel { get; set; }
     public string? FieldOfStudy { get; set; }
 
-    // External links — each present link contributes to ProfileBonus in Algorithm 12
     public string? GitHubUrl { get; set; }
     public string? PortfolioUrl { get; set; }
     public string? LinkedInUrl { get; set; }
 
-    // Resume
     public string? ResumeUrl { get; set; }
 
-    // Navigation
     public User User { get; set; } = null!;
     public ICollection<StudentSkill> StudentSkills { get; set; } = new List<StudentSkill>();
     public ICollection<Application> Applications { get; set; } = new List<Application>();

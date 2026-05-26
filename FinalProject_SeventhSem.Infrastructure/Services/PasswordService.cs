@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Infrastructure.Services;
 
-/// <summary>BCrypt.Net-Next implementation of IPasswordService.</summary>
 public class PasswordService : IPasswordService
 {
     public string Hash(string plainPassword)

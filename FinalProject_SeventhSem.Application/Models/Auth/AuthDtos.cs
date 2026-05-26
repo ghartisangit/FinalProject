@@ -28,7 +28,6 @@ public record RefreshTokenRequest(
     string RefreshToken
 );
 
-// ── Responses ─────────────────────────────────────────────────────────────────
 
 public record AuthResponse(
     string AccessToken,

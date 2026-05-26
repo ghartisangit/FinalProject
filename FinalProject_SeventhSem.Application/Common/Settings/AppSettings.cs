@@ -44,7 +44,6 @@ public class ResumeParsingSettings
     public List<string> StopWords { get; set; } = [];
 }
 
-/// <summary>Maps to "JwtSettings" in appsettings.json.</summary>
 public class JwtSettings
 {
     public const string SectionName = "JwtSettings";
@@ -55,7 +54,6 @@ public class JwtSettings
     public int RefreshTokenExpiryDays { get; set; } = 7;
 }
 
-/// <summary>Maps to "AdminSeed" in appsettings.json. Used by DatabaseSeeder on startup.</summary>
 public class AdminSeedSettings
 {
     public const string SectionName = "AdminSeed";
@@ -73,36 +71,21 @@ public class EmailSettings
 {
     public const string SectionName = "EmailSettings";
 
-    /// <summary>SMTP server hostname. e.g. smtp.gmail.com</summary>
     public string SmtpHost { get; set; } = "smtp.gmail.com";
 
-    /// <summary>SMTP port. 587 for TLS (STARTTLS), 465 for SSL.</summary>
     public int SmtpPort { get; set; } = 587;
 
-    /// <summary>Enable STARTTLS. Set true for port 587.</summary>
     public bool EnableSsl { get; set; } = true;
 
-    /// <summary>SMTP login username (usually the sender email address).</summary>
     public string SmtpUser { get; set; } = string.Empty;
 
-    /// <summary>SMTP login password or app password.</summary>
     public string SmtpPassword { get; set; } = string.Empty;
 
-    /// <summary>The From address shown to recipients.</summary>
     public string FromEmail { get; set; } = "noreply@internhub.com";
 
-    /// <summary>The From display name shown to recipients.</summary>
     public string FromName { get; set; } = "InternHub";
 
-    /// <summary>
-    /// Base URL of the frontend app. Used to build links inside emails
-    /// e.g. "https://internhub.com" → login link becomes "https://internhub.com/login"
-    /// </summary>
     public string AppBaseUrl { get; set; } = "http://localhost:3000";
 
-    /// <summary>
-    /// When true the email body is written to the console instead of sent via SMTP.
-    /// Useful for development where no real SMTP server is configured.
-    /// </summary>
     public bool UseConsoleInDevelopment { get; set; } = true;
 }

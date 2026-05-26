@@ -17,10 +17,8 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.Property(rt => rt.TokenHash).IsRequired();
         builder.Property(rt => rt.TokenLookup).IsRequired().HasMaxLength(32);
 
-        // Unique index enables O(1) lookup before BCrypt.Verify
         builder.HasIndex(rt => rt.TokenLookup).IsUnique();
 
-        // Self-referencing FK for rotation chain
         builder.HasOne(rt => rt.ReplacedByToken)
             .WithMany()
             .HasForeignKey(rt => rt.ReplacedByTokenId)

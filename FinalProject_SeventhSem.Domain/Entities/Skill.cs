@@ -11,7 +11,6 @@ public class Skill : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
 
-    // Navigation
     public ICollection<SkillAlias> Aliases { get; set; } = new List<SkillAlias>();
     public ICollection<StudentSkill> StudentSkills { get; set; } = new List<StudentSkill>();
     public ICollection<VacancySkill> VacancySkills { get; set; } = new List<VacancySkill>();

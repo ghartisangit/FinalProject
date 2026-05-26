@@ -11,9 +11,7 @@ public class SkillAlias : BaseEntity
 {
     public int SkillId { get; set; }
 
-    /// <summary>Lowercase alias stored for case-insensitive matching in Algorithm 2.</summary>
     public string Alias { get; set; } = string.Empty;
 
-    // Navigation
     public Skill Skill { get; set; } = null!;
 }

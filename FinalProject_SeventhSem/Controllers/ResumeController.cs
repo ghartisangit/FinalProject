@@ -33,13 +33,4 @@ public class ResumeController : ApiController
         return Ok(result);
     }
 
-    /// <summary>Confirm reviewed skill suggestions. Replaces all previously confirmed skills.</summary>
-    //[HttpPost("confirm")]
-    //[ProducesResponseType(StatusCodes.Status204NoContent)]
-    //public async Task<IActionResult> ConfirmSkills(
-    //    [FromBody] ConfirmResumeSkillsRequest request, CancellationToken ct)
-    //{
-    //    await Sender.Send(new SetStudentSkillsCommand(CurrentUserId, request.ConfirmedSkillIds), ct);
-    //    return NoContent();
-    //}
 }

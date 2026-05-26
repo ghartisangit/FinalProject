@@ -34,7 +34,6 @@ public class StudentSkillConfiguration : IEntityTypeConfiguration<StudentSkill>
     {
         builder.HasKey(ss => ss.Id);
 
-        // Prevent duplicate confirmed skills per student
         builder.HasIndex(ss => new { ss.StudentId, ss.SkillId }).IsUnique();
 
         builder.HasOne(ss => ss.Skill)

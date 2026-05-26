@@ -16,10 +16,8 @@ public class Question : BaseEntity
     public string OptionC { get; set; } = string.Empty;
     public string OptionD { get; set; } = string.Empty;
 
-    /// <summary>Correct answer label: "A", "B", "C", or "D".</summary>
     public string CorrectOption { get; set; } = string.Empty;
 
-    // Navigation
     public Chapter Chapter { get; set; } = null!;
     public ICollection<StudentSeenQuestion> SeenByStudents { get; set; } = new List<StudentSeenQuestion>();
 }

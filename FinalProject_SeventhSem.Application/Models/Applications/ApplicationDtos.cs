@@ -15,7 +15,6 @@ public record UpdateApplicationStatusRequest(
     ApplicationStatus NewStatus
 );
 
-// ── Responses ─────────────────────────────────────────────────────────────────
 
 public record ApplicationResponse(
     int ApplicationId,
@@ -39,9 +38,6 @@ public record OrganizationApplicationResponse(
     DateTime AppliedAt
 );
 
-/// <summary>
-/// Flattened view of the ApplicationMatchSnapshot stored at apply-time.
-/// </summary>
 public record ApplicationSnapshotDto(
     double RequirementFit,
     double OptionalFit,

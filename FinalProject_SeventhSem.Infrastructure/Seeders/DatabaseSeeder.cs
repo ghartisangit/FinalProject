@@ -15,16 +15,6 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Infrastructure.Seeders;
 
-/// <summary>
-/// Runs on application startup (called from Program.cs).
-/// Idempotent — checks existence before inserting, safe to run on every restart.
-///
-/// Seeds in order:
-///   1. Admin user account
-///   2. Canonical skills + aliases
-///   3. Stacks → Chapters → Questions (sample aptitude test content)
-///   4. Learning resources linked to skills
-/// </summary>
 public class DatabaseSeeder
 {
     private readonly AppDbContext _context;
@@ -82,7 +72,6 @@ public class DatabaseSeeder
             _adminSettings.Email, _adminSettings.Password);
     }
 
-    // ── 2. Skills + Aliases ───────────────────────────────────────────────
 
     private async Task SeedSkillsAsync(CancellationToken ct)
     {

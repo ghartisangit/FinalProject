@@ -13,10 +13,6 @@ using System.Security.Claims;
 
 namespace FinalProject_SeventhSem.Controllers;
 
-/// <summary>
-/// Student profile management and dashboard.
-/// All endpoints require the Student role.
-/// </summary>
 [Authorize(Roles = "Student")]
 public class StudentController : ApiController
 {

@@ -97,7 +97,6 @@ public class ExceptionMiddleware
     }
 }
 
-/// <summary>Consistent error response envelope.</summary>
 public record ErrorResponse(
     int Status,
     string Title,

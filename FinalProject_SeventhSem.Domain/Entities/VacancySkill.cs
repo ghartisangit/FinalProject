@@ -13,7 +13,6 @@ public class VacancySkill : BaseEntity
     public int SkillId { get; set; }
     public bool IsRequired { get; set; }
 
-    // Navigation
     public Vacancy Vacancy { get; set; } = null!;
     public Skill Skill { get; set; } = null!;
 }

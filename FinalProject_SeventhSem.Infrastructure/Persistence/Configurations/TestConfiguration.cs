@@ -77,7 +77,6 @@ public class TestAnswerConfiguration : IEntityTypeConfiguration<TestAnswer>
     {
         builder.HasKey(a => a.Id);
 
-        // One answer per question per test
         builder.HasIndex(a => new { a.TestId, a.QuestionId }).IsUnique();
 
         builder.Property(a => a.SelectedOption).IsRequired().HasMaxLength(1);

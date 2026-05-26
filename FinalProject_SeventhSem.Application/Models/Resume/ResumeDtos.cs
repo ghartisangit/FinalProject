@@ -19,14 +19,10 @@ public record SkillSuggestion(
     int SkillId,
     string SkillName,
     double Confidence,
-    string MatchType   // "Exact" | "Alias"
+    string MatchType  
 );
 
-// ── Requests ──────────────────────────────────────────────────────────────────
 
-/// <summary>
-/// Sent by student after reviewing suggestions. Contains the final confirmed SkillIds.
-/// </summary>
 public record ConfirmResumeSkillsRequest(
     IReadOnlyList<int> ConfirmedSkillIds
 );

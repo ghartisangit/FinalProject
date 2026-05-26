@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Infrastructure.Services;
 
-/// <summary>JWT access token generation and ClaimsPrincipal extraction.</summary>
 public class JwtService : IJwtService
 {
     private readonly JwtSettings _settings;

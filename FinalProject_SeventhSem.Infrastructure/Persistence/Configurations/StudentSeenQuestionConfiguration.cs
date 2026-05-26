@@ -15,7 +15,6 @@ public class StudentSeenQuestionConfiguration : IEntityTypeConfiguration<Student
     {
         builder.HasKey(sq => sq.Id);
 
-        // A student cannot be shown the same question twice across all attempts
         builder.HasIndex(sq => new { sq.StudentId, sq.QuestionId }).IsUnique();
 
         builder.HasOne(sq => sq.Question)

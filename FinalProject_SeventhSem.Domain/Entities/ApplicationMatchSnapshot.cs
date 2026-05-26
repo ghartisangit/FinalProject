@@ -20,11 +20,9 @@ public class ApplicationMatchSnapshot : BaseEntity
     /// <summary>+5 if student's optional education matched; 0 otherwise.</summary>
     public double EducationBonus { get; set; }
 
-    /// <summary>JSON array of SkillIds missing at time of application (Algorithm 6).</summary>
     public string MissingSkillIdsJson { get; set; } = "[]";
 
     public DateTime ComputedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation
     public Application Application { get; set; } = null!;
 }

@@ -18,7 +18,6 @@ public class VacancyConfiguration : IEntityTypeConfiguration<Vacancy>
         builder.Property(v => v.Description).IsRequired().HasMaxLength(5000);
         builder.Property(v => v.RequiredEducationLevel).HasConversion<string>().HasMaxLength(20);
         builder.Property(v => v.RequiredFieldOfStudy).HasMaxLength(150);
-        // ApplicationDeadline is now required — non-nullable datetime2
         builder.Property(v => v.ApplicationDeadline)
             .IsRequired()
             .HasColumnType("datetime2");

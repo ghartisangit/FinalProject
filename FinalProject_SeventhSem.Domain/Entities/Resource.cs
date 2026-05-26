@@ -13,10 +13,8 @@ public class Resource : BaseEntity
     public string? Description { get; set; }
     public string Url { get; set; } = string.Empty;
 
-    /// <summary>e.g. "Article", "Video", "Course".</summary>
     public string? ResourceType { get; set; }
 
-    // Navigation
     public ICollection<ResourceSkillMapping> SkillMappings { get; set; } = new List<ResourceSkillMapping>();
     public ICollection<ResourceRating> Ratings { get; set; } = new List<ResourceRating>();
 }

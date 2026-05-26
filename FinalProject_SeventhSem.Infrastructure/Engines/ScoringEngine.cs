@@ -41,7 +41,6 @@ public class ScoringEngine : IScoringService
         string applicationStatus,
         int rank)
     {
-        // Profile Bonus breakdown
         double profileBonus = 0;
         if (!string.IsNullOrWhiteSpace(student.GitHubUrl)) profileBonus += _t.GitHubBonus;
         if (!string.IsNullOrWhiteSpace(student.PortfolioUrl)) profileBonus += _t.PortfolioBonus;

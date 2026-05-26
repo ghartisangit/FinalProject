@@ -29,6 +29,5 @@ public class TestResult : BaseEntity
 
     public DateTime ComputedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation
     public Test Test { get; set; } = null!;
 }

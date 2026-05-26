@@ -29,21 +29,39 @@ public class GetStudentDashboardQueryHandler
     : IRequestHandler<GetStudentDashboardQuery, ProfileCompletenessResponse>
 {
     private readonly IRepository<Student> _studentRepo;
+    private readonly IRepository<FinalProject_SeventhSem.Domain.Entities.Application> _applicationRepo; // Added
+    private readonly IRepository<Test> _testRepo;
 
-    public GetStudentDashboardQueryHandler(IRepository<Student> studentRepo)
-        => _studentRepo = studentRepo;
+    public GetStudentDashboardQueryHandler(
+            IRepository<Student> studentRepo,
+            IRepository<FinalProject_SeventhSem.Domain.Entities.Application> applicationRepo,
+            IRepository<Test> testRepo)
+    {
+        _studentRepo = studentRepo;
+        _applicationRepo = applicationRepo;
+        _testRepo = testRepo;
+    }
 
     public async Task<ProfileCompletenessResponse> Handle(
         GetStudentDashboardQuery request,
         CancellationToken cancellationToken)
     {
-        //var student = await StudentResolver.ResolveAsync(request.UserId, _studentRepo, cancellationToken);
         var student = await _studentRepo.GetAsync(
                    predicate: s => s.UserId == request.UserId,
                    include: q => q.Include(s => s.StudentSkills),
                    cancellationToken: cancellationToken)
                    ?? throw new NotFoundException(
                        $"No student profile found for UserId {request.UserId}.");
+        int totalApplications = await _applicationRepo.CountAsync(
+       predicate: a => a.StudentId == student.Id,
+       cancellationToken: cancellationToken);
+
+        int totalTests = await _testRepo.CountAsync(
+            predicate: t => t.StudentId == student.Id,
+            cancellationToken: cancellationToken);
+
+
+
         bool hasFullName = !string.IsNullOrWhiteSpace(student.FullName);
         bool hasPhoto = !string.IsNullOrWhiteSpace(student.PhotoUrl);
         bool hasPhone = !string.IsNullOrWhiteSpace(student.PhoneNumber);
@@ -85,7 +103,10 @@ public class GetStudentDashboardQueryHandler
             HasPortfolio: hasPortfolio,
             HasLinkedIn: hasLinkedIn,
             HasBio: hasBio,
-            HasNationality: hasNationality);
+            HasNationality: hasNationality,
+            TotalApplicationApplied: totalApplications,
+            TotalTestsAttempted: totalTests
+        );
     }
 }
 

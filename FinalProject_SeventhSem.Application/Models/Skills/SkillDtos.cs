@@ -14,19 +14,11 @@ public record UpdateSkillRequest(
     string Name
 );
 
-/// <summary>
-/// Admin creates/updates an alias for an existing skill.
-/// Guards (enforced by FluentValidation):
-///   - Alias.Length >= 2
-///   - Alias is not a stopword
-///   - Alias is not already mapped to a different SkillId
-/// </summary>
 public record CreateSkillAliasRequest(
     int SkillId,
     string Alias
 );
 
-// ── Responses ─────────────────────────────────────────────────────────────────
 
 public record SkillResponse(
     int SkillId,

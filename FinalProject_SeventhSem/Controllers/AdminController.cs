@@ -10,7 +10,6 @@ using FinalProject_SeventhSem.Application.Models.Skills;
 using FinalProject_SeventhSem.Application.Models.Stacks;
 using FinalProject_SeventhSem.Domain.Enums;
 
-//using FinalProject_SeventhSem.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,13 +17,7 @@ using System.Reflection;
 
 namespace FinalProject_SeventhSem.Controllers;
 
-/// <summary>
-/// Admin-only operations:
-///   - Verify organizations
-///   - Manage skills and skill aliases
-///   - Manage stacks, chapters, and questions
-/// All endpoints require the Admin role.
-/// </summary>
+
 [Authorize(Roles = "Admin")]
 public class AdminController : ApiController
 {
@@ -141,14 +134,12 @@ public class AdminController : ApiController
 
 
 
-    // GET /admin/stacks/{stackId}/chapters/{chapterId}/questions
     [HttpGet("stacks/{stackId:int}/chapters/{chapterId:int}/questions")]
     [ProducesResponseType(typeof(IReadOnlyList<QuestionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetQuestionsByChapter(int stackId, int chapterId, CancellationToken ct)
         => Ok(await Sender.Send(new GetQuestionsByChapterQuery(stackId, chapterId), ct));
 
-    // GET /admin/stacks/{stackId}/questions
     [HttpGet("stacks/{stackId:int}/questions")]
     [ProducesResponseType(typeof(IReadOnlyList<QuestionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

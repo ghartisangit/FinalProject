@@ -8,10 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FinalProject_SeventhSem.Controllers;
 
-/// <summary>
-/// Handles registration, login, and JWT refresh token rotation.
-/// All endpoints are public (no [Authorize]).
-/// </summary>
 public class AuthController : ApiController
 {
     [HttpPost("register/student")]

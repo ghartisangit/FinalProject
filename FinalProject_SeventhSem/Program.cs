@@ -1,4 +1,3 @@
-// this is the code of magarsangit
 
 using AspNetCoreRateLimit;
 using FinalProject_SeventhSem.Application;
@@ -122,7 +121,6 @@ try
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Database.Migrate();
 
-        // Seed admin, skills, stacks, chapters, questions, resources
         var seeder = scope.ServiceProvider
             .GetRequiredService<FinalProject_SeventhSem.Infrastructure.Seeders.DatabaseSeeder>();
         await seeder.SeedAsync();

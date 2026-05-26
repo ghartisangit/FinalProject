@@ -39,7 +39,6 @@ public class ResourceRatingConfiguration : IEntityTypeConfiguration<ResourceRati
     {
         builder.HasKey(r => r.Id);
 
-        // One rating per student per resource
         builder.HasIndex(r => new { r.ResourceId, r.StudentId }).IsUnique();
 
         builder.Property(r => r.Rating).IsRequired();

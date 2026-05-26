@@ -12,7 +12,6 @@ public class Chapter : BaseEntity
     public int StackId { get; set; }
     public string Name { get; set; } = string.Empty;
 
-    // Navigation
     public Stack Stack { get; set; } = null!;
     public ICollection<Question> Questions { get; set; } = new List<Question>();
 }

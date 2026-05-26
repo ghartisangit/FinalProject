@@ -12,7 +12,6 @@ public class ResourceSkillMapping : BaseEntity
     public int ResourceId { get; set; }
     public int SkillId { get; set; }
 
-    // Navigation
     public Resource Resource { get; set; } = null!;
     public Skill Skill { get; set; } = null!;
 }

@@ -18,7 +18,6 @@ public class TestResultConfiguration : IEntityTypeConfiguration<TestResult>
         builder.Property(r => r.ChapterScoresJson).IsRequired().HasColumnType("nvarchar(max)");
         builder.Property(r => r.WeakChapterIdsJson).IsRequired().HasColumnType("nvarchar(max)");
 
-        // Filtered index: at most one IsLatest=true record per student
         builder.HasIndex(r => new { r.StudentId, r.IsLatest })
             .HasFilter("[IsLatest] = 1");
     }

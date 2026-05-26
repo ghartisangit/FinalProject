@@ -20,7 +20,6 @@ public record UpdateStudentProfileRequest(
     string? LinkedInUrl
 );
 
-// ── Responses ─────────────────────────────────────────────────────────────────
 
 public record StudentProfileResponse(
     int StudentId,
@@ -39,6 +38,7 @@ public record StudentProfileResponse(
     string? LinkedInUrl,
     string? ResumeUrl,
     IReadOnlyList<SkillSummary> ConfirmedSkills
+    
 );
 
 public record SkillSummary(
@@ -46,7 +46,6 @@ public record SkillSummary(
     string Name
 );
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
 
 /// <summary>
 /// Profile completeness breakdown. Computed on the fly (Option A — no DB column).
@@ -64,5 +63,7 @@ public record ProfileCompletenessResponse(
     bool HasPortfolio,
     bool HasLinkedIn,
     bool HasBio,
-    bool HasNationality
+    bool HasNationality,
+    int TotalApplicationApplied,
+    int TotalTestsAttempted
 );

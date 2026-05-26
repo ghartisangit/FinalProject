@@ -15,15 +15,6 @@ public record CreateChapterRequest(
 );
 public record UpdateChapterRequest(string Name);
 
-//public record CreateQuestionRequest(
-//    int ChapterId,
-//    string Text,
-//    string OptionA,
-//    string OptionB,
-//    string OptionC,
-//    string OptionD,
-//    string CorrectOption   // "A" | "B" | "C" | "D"
-//);
 
 public record CreateQuestionRequest(
     int StackId,
@@ -45,16 +36,6 @@ public record PatchQuestionRequest(
     string? CorrectOption
 );
 
-//public record UpdateQuestionRequest(
-//    string Text,
-//    string OptionA,
-//    string OptionB,
-//    string OptionC,
-//    string OptionD,
-//    string CorrectOption
-//);
-
-// ── Responses ─────────────────────────────────────────────────────────────────
 
 public record StackResponse(
     int StackId,

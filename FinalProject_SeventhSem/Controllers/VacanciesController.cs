@@ -14,15 +14,11 @@ using System.Security.Claims;
 
 namespace FinalProject_SeventhSem.Controllers;
 
-/// <summary>
-/// Vacancy creation and publishing (Organization) + vacancy matching for students (Algorithms 3–6).
-/// </summary>
 public class VacanciesController : ApiController
 {
     private int CurrentUserId =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    // ── Student ────────────────────────────────────────────────────────────
 
     /// <summary>All published vacancies with match scores for the student (Algorithms 3–6).</summary>
     [HttpGet("matches")]
@@ -31,7 +27,6 @@ public class VacanciesController : ApiController
     public async Task<IActionResult> GetMatches(CancellationToken ct)
         => Ok(await Sender.Send(new GetVacancyMatchesQuery(CurrentUserId), ct));
 
-    /// <summary>Get a vacancy by ID.</summary>
     [HttpGet("{id:int}")]
     [Authorize]
     [ProducesResponseType(typeof(VacancyResponse), StatusCodes.Status200OK)]
@@ -48,16 +43,13 @@ public class VacanciesController : ApiController
 
 
 
-    // ── Organization ───────────────────────────────────────────────────────
-
-    /// <summary>List all vacancies (published + draft) for the authenticated organization.</summary>
     [HttpGet("mine")]
     [Authorize(Roles = "Organization")]
     [ProducesResponseType(typeof(IReadOnlyList<VacancyResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetMine(CancellationToken ct)
         => Ok(await Sender.Send(new GetOrganizationVacanciesQuery(CurrentUserId), ct));
 
-    /// <summary>Create a new vacancy draft.</summary>
+
     [HttpPost]
     [Authorize(Roles = "Organization")]
     [ProducesResponseType(typeof(VacancyResponse), StatusCodes.Status201Created)]
@@ -68,7 +60,7 @@ public class VacanciesController : ApiController
             OrganizationId: CurrentUserId,
             Title: request.Title,
             Description: request.Description,
-            ApplicationDeadline: request.ApplicationDeadline,   // ← add
+            ApplicationDeadline: request.ApplicationDeadline,   
             RequiredEducationLevel: request.RequiredEducationLevel,
             RequiredFieldOfStudy: request.RequiredFieldOfStudy,
             RequiredSkillIds: request.RequiredSkillIds,
@@ -88,7 +80,7 @@ public class VacanciesController : ApiController
             OrganizationId: CurrentUserId,
             Title: request.Title,
             Description: request.Description,
-            ApplicationDeadline: request.ApplicationDeadline,   // ← add
+            ApplicationDeadline: request.ApplicationDeadline,  
             RequiredEducationLevel: request.RequiredEducationLevel,
             RequiredFieldOfStudy: request.RequiredFieldOfStudy,
             RequiredSkillIds: request.RequiredSkillIds,
@@ -99,7 +91,6 @@ public class VacanciesController : ApiController
  
 
 
-    /// <summary>Delete a vacancy owned by the authenticated organization.</summary>
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Organization")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

@@ -9,11 +9,7 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Common;
 
-/// <summary>
-/// Resolves a UserId (from JWT sub claim) to the corresponding Student entity.
-/// Centralises the UserId → StudentId lookup so every handler/controller
-/// doesn't repeat the pattern and can't forget the null check.
-/// </summary>
+
 public static class StudentResolver
 {
     public static async Task<Student> ResolveAsync(

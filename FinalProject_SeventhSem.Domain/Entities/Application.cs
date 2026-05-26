@@ -16,7 +16,6 @@ public class Application : BaseEntity
     public DateTime AppliedAt { get; set; } = DateTime.UtcNow;
     public DateTime? StatusUpdatedAt { get; set; }
 
-    // Navigation
     public Student Student { get; set; } = null!;
     public Vacancy Vacancy { get; set; } = null!;
     public ApplicationMatchSnapshot? MatchSnapshot { get; set; }

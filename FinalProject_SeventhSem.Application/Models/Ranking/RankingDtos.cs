@@ -25,7 +25,6 @@ public record RankedCandidateDto(
     string? PortfolioUrl,
     string? LinkedInUrl,
 
-    // Algorithm 12 component scores
     double RequirementFit,      // 0–100  (weight: 1×)
     double AptitudeScore,       // LatestTestScore * AptitudeBonusWeight (0.30)
     double OptionalFitScore,    // OptionalFit * OptionalSkillWeight (0.15)

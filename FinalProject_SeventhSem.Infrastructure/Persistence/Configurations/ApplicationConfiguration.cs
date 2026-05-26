@@ -15,7 +15,6 @@ public class ApplicationConfiguration : IEntityTypeConfiguration<FinalProject_Se
     {
         builder.HasKey(a => a.Id);
 
-        // One application per student per vacancy
         builder.HasIndex(a => new { a.StudentId, a.VacancyId }).IsUnique();
 
         builder.Property(a => a.Status)

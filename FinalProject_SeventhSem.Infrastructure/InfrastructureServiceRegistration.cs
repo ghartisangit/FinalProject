@@ -16,10 +16,6 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Infrastructure;
 
-/// <summary>
-/// Registers all Infrastructure services: EF Core, repositories, engines, and utility services.
-/// Called from Program.cs: builder.Services.AddInfrastructureServices(builder.Configuration)
-/// </summary>
 public static class InfrastructureServiceRegistration
 {
     public static IServiceCollection AddInfrastructureServices(

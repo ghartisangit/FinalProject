@@ -13,7 +13,6 @@ public class StudentSeenQuestion : BaseEntity
     public int QuestionId { get; set; }
     public DateTime AskedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation
     public Student Student { get; set; } = null!;
     public Question Question { get; set; } = null!;
 }

@@ -41,7 +41,6 @@ public class MatchingEngine : IMatchingService
         _skillRepo = skillRepo;
     }
 
-    // ── Algorithm 3 ───────────────────────────────────────────────────────
 
     public (bool IsEligible, double EducationBonus) CheckEducation(Student student, Vacancy vacancy)
     {
@@ -68,7 +67,6 @@ public class MatchingEngine : IMatchingService
         return (true, bonus);
     }
 
-    // ── Algorithm 4 ───────────────────────────────────────────────────────
 
     public double ComputeRequirementFit(
         IEnumerable<int> studentSkillIds, IEnumerable<int> requiredSkillIds)
@@ -80,7 +78,6 @@ public class MatchingEngine : IMatchingService
         return Math.Round((double)matched / required.Count * 100, 2);
     }
 
-    // ── Algorithm 5 ───────────────────────────────────────────────────────
 
     public double ComputeOptionalFit(
         IEnumerable<int> studentSkillIds, IEnumerable<int> optionalSkillIds)
@@ -92,7 +89,6 @@ public class MatchingEngine : IMatchingService
         return Math.Round((double)matched / optional.Count * 100, 2);
     }
 
-    // ── Algorithm 6 ───────────────────────────────────────────────────────
 
     public IReadOnlyList<int> ComputeSkillGap(
         IEnumerable<int> studentSkillIds,
@@ -107,7 +103,6 @@ public class MatchingEngine : IMatchingService
             .ToList();
     }
 
-    // ── Full match (Algorithms 3–6 combined) ─────────────────────────────
 
     public VacancyMatchResult Match(Student student, Vacancy vacancy)
     {
@@ -136,7 +131,6 @@ public class MatchingEngine : IMatchingService
         else if (requirementFit < _thresholds.EligibilityMinPercent)
             message = $"Requirement fit {requirementFit:F1}% is below the minimum {_thresholds.EligibilityMinPercent}%.";
 
-        // Resolve skill names for the response (flat list, no labels per spec)
         var skillNameMap = vacancy.VacancySkills
             .Select(vs => vs.Skill)
             .DistinctBy(s => s.Id)

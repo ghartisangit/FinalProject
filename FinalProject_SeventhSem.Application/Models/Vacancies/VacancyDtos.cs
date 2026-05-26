@@ -51,12 +51,6 @@ public record VacancySkillDto(
     string SkillName
 );
 
-// ── Matching (Student Side) ───────────────────────────────────────────────────
-
-/// <summary>
-/// Result of running Algorithms 3–6 on a single vacancy for the requesting student.
-/// Ineligible vacancies are still returned with IsEligible = false and an EligibilityMessage.
-/// </summary>
 public record VacancyMatchResult(
     int VacancyId,
     string Title,

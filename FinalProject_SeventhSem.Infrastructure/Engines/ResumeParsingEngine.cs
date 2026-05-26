@@ -47,7 +47,6 @@ public class ResumeParsingEngine : IResumeParsingService
         _aliasRepo = aliasRepo;
     }
 
-    // ── Algorithm 1 Input: PdfPig extraction ─────────────────────────────
 
     public Task<string> ExtractTextAsync(Stream pdfStream)
     {
@@ -143,18 +142,13 @@ public class ResumeParsingEngine : IResumeParsingService
     {
         if (string.IsNullOrWhiteSpace(rawText)) return string.Empty;
 
-        // 1. Fix broken lines — join hyphenated line-breaks
         var text = Regex.Replace(rawText, @"-\s*\n\s*", "");
 
-        // 2. Normalize newlines to spaces
         text = Regex.Replace(text, @"[\r\n]+", " ");
 
-        // 3. Preserve special-character and multi-word skills BEFORE stripping
-        // CRITICAL: Always catch longer phrases first!
         text = Regex.Replace(text, @"\bASP\.NET\s+Core\s+Web\s+API\b", "aspnetcorewebapi", RegexOptions.IgnoreCase);
         text = Regex.Replace(text, @"\bASP\.NET\s+Core\s+MVC\b", "aspnetcoremvc", RegexOptions.IgnoreCase);
 
-        // Now match shorter versions safely
         text = Regex.Replace(text, @"\bASP\.NET\b", "aspnetcore", RegexOptions.IgnoreCase);
         text = Regex.Replace(text, @"\b\.NET\b", "dotnet", RegexOptions.IgnoreCase);
         text = Regex.Replace(text, @"\bC#(?!\w)", "csharp", RegexOptions.IgnoreCase);
@@ -165,13 +159,10 @@ public class ResumeParsingEngine : IResumeParsingService
         text = Regex.Replace(text, @"\bNext\.js\b", "nextjs", RegexOptions.IgnoreCase);
         text = Regex.Replace(text, @"\bC\b", "clang");
 
-        // 4. Remove special characters, keep letters, digits, spaces
         text = Regex.Replace(text, @"[^a-zA-Z0-9\s]", " ");
 
-        // 5. Collapse multiple spaces
         text = Regex.Replace(text, @"\s{2,}", " ");
 
-        // 6. Convert to lowercase
         return text.ToLowerInvariant().Trim();
     }
    

@@ -10,11 +10,6 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Infrastructure.Persistence.Repositories;
 
-/// <summary>
-/// Generic EF Core repository. Satisfies IRepository&lt;T&gt; for all entities.
-/// Feature-specific queries (e.g. filtering by StudentId) are handled in CQRS
-/// handlers via GetAllAsync + LINQ — keeping the repo surface minimal.
-/// </summary>
 public class Repository<T> : IRepository<T> where T : BaseEntity
 {
     protected readonly AppDbContext _context;

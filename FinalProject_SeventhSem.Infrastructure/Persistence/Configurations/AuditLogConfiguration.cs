@@ -19,7 +19,6 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         builder.Property(a => a.OldValuesJson).HasColumnType("nvarchar(max)");
         builder.Property(a => a.NewValuesJson).HasColumnType("nvarchar(max)");
 
-        // AuditLog is append-only; no navigation to User to avoid cascade cycles
         builder.HasIndex(a => new { a.EntityName, a.EntityId });
         builder.HasIndex(a => a.Timestamp);
     }
