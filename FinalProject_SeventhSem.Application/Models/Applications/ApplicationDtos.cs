@@ -35,7 +35,9 @@ public record OrganizationApplicationResponse(
     int StudentId,
     string StudentName,
     string Status,
-    DateTime AppliedAt
+    DateTime AppliedAt,
+    string? ResumeUrl,
+    int TestCount
 );
 
 public record ApplicationSnapshotDto(

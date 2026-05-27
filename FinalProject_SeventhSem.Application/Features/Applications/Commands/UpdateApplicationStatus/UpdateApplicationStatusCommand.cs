@@ -17,6 +17,5 @@ public record UpdateApplicationStatusCommand(
     ApplicationStatus NewStatus
 ) : IRequest;
 
-// ── Validator ─────────────────────────────────────────────────────────────────
 
 

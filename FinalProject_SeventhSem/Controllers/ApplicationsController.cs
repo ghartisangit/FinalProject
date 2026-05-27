@@ -12,10 +12,6 @@ using System.Security.Claims;
 
 namespace FinalProject_SeventhSem.Controllers;
 
-
-
-
-
 public class ApplicationsController : ApiController
 {
     private int CurrentUserId =>
@@ -84,6 +80,6 @@ public class ApplicationsController : ApiController
     {
         await Sender.Send(new UpdateApplicationStatusCommand(
             applicationId, CurrentUserId, request.NewStatus), ct);
-        return NoContent();
+        return Ok("Application status updated successfully.");
     }
 }

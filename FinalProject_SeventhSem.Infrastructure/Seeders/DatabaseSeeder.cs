@@ -99,7 +99,6 @@ public class DatabaseSeeder
             ["ASP.NET Core Web API"] = ["aspnetcorewebapi", "asp-net-core-web-api"], 
 
             ["ASP.NET Core MVC"] = ["aspnetcoremvc", "asp-net-core-mvc"],
-            //["ASP.NET Core"] = ["aspnet", "aspnetcore", "asp-net-core", "dotnet-web", "ASP.NET Core Web API","ASP.NET Core MVC"],
             ["Entity Framework Core"] = ["ef", "efcore", "entity-framework"],
             ["React"] = ["reactjs", "react-js"],
             ["React Native"] = ["react-native", "rn", "expo", "cross-platform-mobile", "mobile-react"],

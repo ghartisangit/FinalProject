@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Applications.Queries.GetOrganizationApplications;
 
-// GET ALL APPLICATIONS ACROSS ALL VACANCIES FOR AN ORGANIZATION
 public record GetOrganizationApplicationsQuery(int UserId) : IRequest<IReadOnlyList<OrganizationApplicationResponse>>;
 
 public class GetOrganizationApplicationsQueryHandler
@@ -32,13 +31,16 @@ public class GetOrganizationApplicationsQueryHandler
     public async Task<IReadOnlyList<OrganizationApplicationResponse>> Handle(
         GetOrganizationApplicationsQuery request, CancellationToken ct)
     {
-        var organization = (await _orgRepo.GetAllAsync(ct))
-            .FirstOrDefault(o => o.UserId == request.UserId)
-            ?? throw new NotFoundException(nameof(Organization), request.UserId);
+
+        var organization = await _orgRepo.GetAsync(
+        o => o.UserId == request.UserId,   
+        cancellationToken: ct)
+        ?? throw new NotFoundException(nameof(Organization), request.UserId);
 
         var applications = await _applicationRepo.GetAllAsync(
             q => q
                 .Include(a => a.Student)
+                    .ThenInclude(s => s.Tests)  
                 .Include(a => a.Vacancy)
                 .Where(a => a.Vacancy.OrganizationId == organization.Id),
             ct);
@@ -52,12 +54,13 @@ public class GetOrganizationApplicationsQueryHandler
                StudentId: a.StudentId,
                StudentName: a.Student.FullName,
                Status: a.Status.ToString(),
-               AppliedAt: a.AppliedAt))
+               AppliedAt: a.AppliedAt,
+               ResumeUrl: a.Student.ResumeUrl,
+               TestCount: a.Student.Tests.Count))
            .ToList();
     }
 }
 
-// GET APPLICATIONS FOR A SPECIFIC VACANCY
 public record GetApplicationsByVacancyQuery(int VacancyId, int UserId) : IRequest<IReadOnlyList<OrganizationApplicationResponse>>;
 
 public class GetApplicationsByVacancyQueryHandler
@@ -80,9 +83,13 @@ public class GetApplicationsByVacancyQueryHandler
     public async Task<IReadOnlyList<OrganizationApplicationResponse>> Handle(
         GetApplicationsByVacancyQuery request, CancellationToken ct)
     {
-        var organization = (await _orgRepo.GetAllAsync(ct))
-            .FirstOrDefault(o => o.UserId == request.UserId)
-            ?? throw new NotFoundException(nameof(Organization), request.UserId);
+      
+
+        var organization = await _orgRepo.GetAsync(
+        o => o.UserId == request.UserId,  
+        cancellationToken: ct)
+        ?? throw new NotFoundException(nameof(Organization), request.UserId);
+
 
         var vacancy = await _vacancyRepo.GetByIdAsync(request.VacancyId, ct)
             ?? throw new NotFoundException(nameof(Vacancy), request.VacancyId);
@@ -90,12 +97,14 @@ public class GetApplicationsByVacancyQueryHandler
         if (vacancy.OrganizationId != organization.Id)
             throw new UnauthorizedException("You do not own this vacancy.");
 
+
         var applications = await _applicationRepo.GetAllAsync(
-            q => q
-                .Include(a => a.Student)
-                .Include(a => a.Vacancy)
-                .Where(a => a.VacancyId == request.VacancyId),
-            ct);
+        q => q
+            .Include(a => a.Student)
+                .ThenInclude(s => s.Tests) 
+            .Include(a => a.Vacancy)
+            .Where(a => a.VacancyId == request.VacancyId),
+        ct);
 
         return applications
             .OrderByDescending(a => a.AppliedAt)
@@ -106,7 +115,9 @@ public class GetApplicationsByVacancyQueryHandler
                 StudentId: a.StudentId,
                 StudentName: a.Student.FullName,
                 Status: a.Status.ToString(),
-                AppliedAt: a.AppliedAt))
+                AppliedAt: a.AppliedAt,
+                ResumeUrl: a.Student.ResumeUrl,
+                TestCount: a.Student.Tests.Count))
             .ToList();
     }
 }

@@ -17,20 +17,15 @@ public record OrganizationSummaryDto(
     string Name,
     string Email,
     string? WebsiteUrl,
+    string? Reason,
     OrganizationStatus Status,
     DateTime CreatedAt
 );
 
-// ── Query ─────────────────────────────────────────────────────────────────────
 
-/// <summary>
-/// Admin retrieves all registered organizations.
-/// Supports optional filter: pending = true returns only unverified ones.
-/// </summary>
 public record GetAllOrganizationsQuery(bool PendingOnly = false)
     : IRequest<IReadOnlyList<OrganizationSummaryDto>>;
 
-// ── Handler ───────────────────────────────────────────────────────────────────
 
 public class GetAllOrganizationsQueryHandler
     : IRequestHandler<GetAllOrganizationsQuery, IReadOnlyList<OrganizationSummaryDto>>
@@ -43,7 +38,6 @@ public class GetAllOrganizationsQueryHandler
     public async Task<IReadOnlyList<OrganizationSummaryDto>> Handle(
         GetAllOrganizationsQuery request, CancellationToken cancellationToken)
     {
-        //var orgs = await _orgRepo.GetAllAsync(cancellationToken);
         var orgs = await _orgRepo.GetAllAsync(
     include: q => q.Include(o => o.User),
     cancellationToken: cancellationToken);
@@ -60,6 +54,7 @@ public class GetAllOrganizationsQueryHandler
                 Name: o.Name,
                 Email: o.User.Email,
                 WebsiteUrl: o.WebsiteUrl,
+                Reason: o.Reason,
                 Status: o.Status,
                 CreatedAt: o.CreatedAt))
             .ToList();

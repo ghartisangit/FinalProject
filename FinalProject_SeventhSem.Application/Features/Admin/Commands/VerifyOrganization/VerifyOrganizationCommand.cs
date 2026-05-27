@@ -32,7 +32,6 @@ public record VerifyOrganizationResponse(
     int OrganizationId,
     string OrganizationName,
     string Email,
-    //bool IsVerified,
     OrganizationStatus Status,
     bool IsActive,
     DateTime UpdatedAt
