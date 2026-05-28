@@ -46,9 +46,6 @@ public class ApplyToVacancyCommandHandler : IRequestHandler<ApplyToVacancyComman
     public async Task<ApplicationResponse> Handle(
         ApplyToVacancyCommand request, CancellationToken cancellationToken)
     {
-        //var student = await StudentResolver.ResolveAsync(request.StudentId, _studentRepo, cancellationToken);
-        //var student = await _studentRepo.GetByIdAsync(request.StudentId, cancellationToken)
-        //?? throw new NotFoundException(nameof(Student), request.StudentId);
 
 
         var student = await _studentRepo.GetAsync(
@@ -57,8 +54,6 @@ public class ApplyToVacancyCommandHandler : IRequestHandler<ApplyToVacancyComman
             cancellationToken: cancellationToken)
             ?? throw new NotFoundException(nameof(Student), request.StudentId);
 
-        //var vacancy = await _vacancyRepo.GetByIdAsync(request.VacancyId, cancellationToken)
-        //    ?? throw new NotFoundException(nameof(Vacancy), request.VacancyId);
 
 
         var vacancy = await _vacancyRepo.GetByIdAsync(
@@ -78,15 +73,7 @@ public class ApplyToVacancyCommandHandler : IRequestHandler<ApplyToVacancyComman
                 $"The application deadline was {vacancy.ApplicationDeadline:dd MMM yyyy HH:mm} UTC. " +
                 $"This vacancy is no longer accepting applications.");
 
-        // Duplicate application check
-        //var existing = (await _applicationRepo.GetAllAsync(cancellationToken))
-        //    .FirstOrDefault(a => a.StudentId == request.StudentId && a.VacancyId == request.VacancyId);
-        //if (existing is not null)
-        //    throw new AlreadyAppliedException("You have already applied to this vacancy.");
-
-
-
-        // Duplicate application check
+       
         var existing = await _applicationRepo.GetAsync(
             predicate: a => a.StudentId == student.Id && a.VacancyId == vacancy.Id,
             cancellationToken: cancellationToken);
@@ -97,9 +84,7 @@ public class ApplyToVacancyCommandHandler : IRequestHandler<ApplyToVacancyComman
         }
 
 
-        //throw new ConflictException("You have already applied to this vacancy.");
-
-        // Run matching algorithms 3–6 and snapshot the result
+       
         var matchResult = _matching.Match(student, vacancy);
 
         var application = new FinalProject_SeventhSem.Domain.Entities.Application
@@ -112,13 +97,13 @@ public class ApplyToVacancyCommandHandler : IRequestHandler<ApplyToVacancyComman
         await _uow.SaveChangesAsync(cancellationToken);
 
         // Resolve missing skill names for snapshot
-        var allSkills = await _skillRepo.GetAllAsync(cancellationToken);
-        var skillMap = allSkills.ToDictionary(s => s.Id, s => s.Name);
+        //var allSkills = await _skillRepo.GetAllAsync(cancellationToken);
+        //var skillMap = allSkills.ToDictionary(s => s.Id, s => s.Name);
 
-        var missingIds = _matching.ComputeSkillGap(
-            student.StudentSkills.Select(ss => ss.SkillId),
-            vacancy.VacancySkills.Where(vs => vs.IsRequired).Select(vs => vs.SkillId),
-            vacancy.VacancySkills.Where(vs => !vs.IsRequired).Select(vs => vs.SkillId));
+        //var missingIds = _matching.ComputeSkillGap(
+        //    student.StudentSkills.Select(ss => ss.SkillId),
+        //    vacancy.VacancySkills.Where(vs => vs.IsRequired).Select(vs => vs.SkillId),
+        //    vacancy.VacancySkills.Where(vs => !vs.IsRequired).Select(vs => vs.SkillId));
 
         var snapshot = new ApplicationMatchSnapshot
         {
@@ -126,7 +111,7 @@ public class ApplyToVacancyCommandHandler : IRequestHandler<ApplyToVacancyComman
             RequirementFit = matchResult.RequirementFit,
             OptionalFit = matchResult.OptionalFit,
             EducationBonus = matchResult.EducationBonus,
-            MissingSkillIdsJson = JsonSerializer.Serialize(missingIds),
+            MissingSkillIdsJson = JsonSerializer.Serialize(matchResult.MissingSkillIds),
             ComputedAt = DateTime.UtcNow
         };
         await _snapshotRepo.AddAsync(snapshot, cancellationToken);
@@ -145,7 +130,7 @@ public class ApplyToVacancyCommandHandler : IRequestHandler<ApplyToVacancyComman
                 RequirementFit: snapshot.RequirementFit,
                 OptionalFit: snapshot.OptionalFit,
                 EducationBonus: snapshot.EducationBonus,
-                MissingSkills: missingIds.Select(id => skillMap.GetValueOrDefault(id, "Unknown")).ToList(),
+                MissingSkills: matchResult.MissingSkills,
                 ComputedAt: snapshot.ComputedAt));
     }
 }

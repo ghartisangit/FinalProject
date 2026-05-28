@@ -13,16 +13,9 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Applications.Queries.GetStudentApplications;
 
-// ── Query ─────────────────────────────────────────────────────────────────────
-
-/// <summary>
-/// Returns all applications submitted by the authenticated student,
-/// including their immutable match snapshot.
-/// </summary>
 public record GetStudentApplicationsQuery(int UserId)
     : IRequest<IReadOnlyList<ApplicationResponse>>;
 
-// ── Handler ───────────────────────────────────────────────────────────────────
 
 public class GetStudentApplicationsQueryHandler
     : IRequestHandler<GetStudentApplicationsQuery, IReadOnlyList<ApplicationResponse>>
@@ -48,10 +41,7 @@ public class GetStudentApplicationsQueryHandler
         var allSkills = await _skillRepo.GetAllAsync(cancellationToken);
         var skillMap = allSkills.ToDictionary(s => s.Id, s => s.Name);
 
-        //var apps = (await _applicationRepo.GetAllAsync(cancellationToken))
-        //    .Where(a => a.StudentId == student.Id)
-        //    .OrderByDescending(a => a.AppliedAt)
-        //    .ToList();
+
 
         var apps = await _applicationRepo.GetAllAsync(
     q => q

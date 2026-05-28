@@ -149,6 +149,7 @@ public class MatchingEngine : IMatchingService
             RequirementFit: requirementFit,
             OptionalFit: optionalFit,
             EducationBonus: educationBonus,
-            MissingSkills: missingNames);
+            MissingSkills: missingNames,
+            MissingSkillIds: missingIds);
     }
 }

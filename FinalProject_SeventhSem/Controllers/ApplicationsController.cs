@@ -1,4 +1,5 @@
-﻿using FinalProject_SeventhSem.Application.Features.Applications.Commands.ApplyToVacancy;
+﻿using FinalProject_SeventhSem.Application.Features.Admin.Queries.GetOrganizationDashboard;
+using FinalProject_SeventhSem.Application.Features.Applications.Commands.ApplyToVacancy;
 using FinalProject_SeventhSem.Application.Features.Applications.Commands.UpdateApplicationStatus;
 using FinalProject_SeventhSem.Application.Features.Applications.Queries.GetOrganizationApplications;
 using FinalProject_SeventhSem.Application.Features.Applications.Queries.GetRankedCandidates;
@@ -27,6 +28,12 @@ public class ApplicationsController : ApiController
             new ApplyToVacancyCommand(CurrentUserId, request.VacancyId), ct);
         return StatusCode(StatusCodes.Status201Created, result);
     }
+
+    //[HttpGet("dashboard")]
+    //[Authorize(Roles = "Organization")]
+    //[ProducesResponseType(typeof(OrganizationDashboardResponse), StatusCodes.Status200OK)]
+    //public async Task<IActionResult> GetDashboard(CancellationToken ct)
+    //    => Ok(await Sender.Send(new GetOrganizationDashboardQuery(), ct));
 
     [HttpGet("mine")]
     [Authorize(Roles = "Student")]

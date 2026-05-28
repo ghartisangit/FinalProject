@@ -60,5 +60,5 @@ public record VacancyMatchResult(
     double RequirementFit,             // Algorithm 4 output (0–100)
     double OptionalFit,                // Algorithm 5 output (0–100)
     double EducationBonus,             // Algorithm 3 output (0 or 5)
-    IReadOnlyList<string> MissingSkills // Algorithm 6 output (flat list)
-);
+    IReadOnlyList<string> MissingSkills, // Algorithm 6 output (flat list)
+     IReadOnlyList<int> MissingSkillIds);
