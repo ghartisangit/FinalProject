@@ -15,11 +15,9 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Features.Tests.Commands.StartTest;
 
-//public record StartTestCommand(int StudentId) : IRequest<TestSessionResponse>;
 
 public record StartTestCommand(int StudentId, int StackId) : IRequest<TestSessionResponse>;
 
-// ── Validator ─────────────────────────────────────────────────────────────────
 
 public class StartTestCommandValidator : AbstractValidator<StartTestCommand>
 {
@@ -32,5 +30,4 @@ public class StartTestCommandValidator : AbstractValidator<StartTestCommand>
    
 }
 
-// ── Handler ───────────────────────────────────────────────────────────────────
 

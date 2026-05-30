@@ -65,7 +65,7 @@ public class GetRankedCandidatesQueryHandler
             .ToDictionary(tr => tr.StudentId, tr => tr.Score);
 
         var eligible = applications
-            .Where(a => a.MatchSnapshot != null && a.MatchSnapshot.RequirementFit >= 10)
+            .Where(a => a.MatchSnapshot != null && a.MatchSnapshot.RequirementFit >= 60)
             .ToList();
 
         var ranked = eligible

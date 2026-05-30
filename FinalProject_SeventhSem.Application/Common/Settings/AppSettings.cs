@@ -25,6 +25,7 @@ public class ThresholdSettings
     public double PortfolioBonus { get; set; } = 4;
     public double LinkedInBonus { get; set; } = 2;
     public double EducationOptionalBonus { get; set; } = 5;
+    public double EducationLevelBonus { get; set; }
 
     /// <summary>
     /// Max possible RankingScore — denominator for FinalScore normalisation.

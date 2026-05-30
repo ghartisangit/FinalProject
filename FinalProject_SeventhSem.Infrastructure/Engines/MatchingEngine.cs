@@ -44,11 +44,9 @@ public class MatchingEngine : IMatchingService
 
     public (bool IsEligible, double EducationBonus) CheckEducation(Student student, Vacancy vacancy)
     {
-        // No education requirement → everyone passes, no bonus
         if (vacancy.RequiredEducationLevel is null)
             return (true, 0);
 
-        // Hard filter: student's level must be >= required level (enum ordinal)
         bool meetsLevel = student.EducationLevel.HasValue &&
                           (int)student.EducationLevel.Value >= (int)vacancy.RequiredEducationLevel.Value;
 
@@ -56,15 +54,15 @@ public class MatchingEngine : IMatchingService
             return (false, 0);
 
         // Optional field-of-study match → +EducationOptionalBonus
-        double bonus = 0;
-        if (!string.IsNullOrWhiteSpace(vacancy.RequiredFieldOfStudy) &&
-            !string.IsNullOrWhiteSpace(student.FieldOfStudy) &&
-            student.FieldOfStudy.Equals(vacancy.RequiredFieldOfStudy, StringComparison.OrdinalIgnoreCase))
-        {
-            bonus = _thresholds.EducationOptionalBonus;
-        }
+        //double bonus = _thresholds.EducationLevelBonus;
+        //if (!string.IsNullOrWhiteSpace(vacancy.RequiredFieldOfStudy) &&
+        //    !string.IsNullOrWhiteSpace(student.FieldOfStudy) &&
+        //    student.FieldOfStudy.Equals(vacancy.RequiredFieldOfStudy, StringComparison.OrdinalIgnoreCase))
+        //{
+        //    bonus += _thresholds.EducationOptionalBonus;
+        //}
 
-        return (true, bonus);
+        return (true, _thresholds.EducationLevelBonus);
     }
 
 
@@ -72,7 +70,7 @@ public class MatchingEngine : IMatchingService
         IEnumerable<int> studentSkillIds, IEnumerable<int> requiredSkillIds)
     {
         var required = requiredSkillIds.ToHashSet();
-        if (required.Count == 0) return 100; // edge-case guard (vacancy validation prevents this)
+        if (required.Count == 0) return 100; 
 
         var matched = studentSkillIds.Count(id => required.Contains(id));
         return Math.Round((double)matched / required.Count * 100, 2);

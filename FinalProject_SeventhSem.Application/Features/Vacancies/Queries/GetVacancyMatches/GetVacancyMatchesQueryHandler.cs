@@ -53,6 +53,7 @@ public class GetVacancyMatchesQueryHandler
 
         var results = vacancies
             .Select(v => _matching.Match(student, v))
+            //.Where(r=> r.IsEligible)
             .OrderByDescending(r => r.RequirementFit)
             .ThenByDescending(r => r.OptionalFit)
             .ThenByDescending(r => r.EducationBonus)
