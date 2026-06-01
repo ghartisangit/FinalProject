@@ -17,7 +17,6 @@ namespace FinalProject_SeventhSem.Application.Features.Tests.Commands.SubmitTest
 
 public record SubmitTestCommand(int TestId, int UserId) : IRequest<TestResultResponse>;
 
-// ── Validator ─────────────────────────────────────────────────────────────────
 
 public class SubmitTestCommandValidator : AbstractValidator<SubmitTestCommand>
 {
@@ -28,5 +27,4 @@ public class SubmitTestCommandValidator : AbstractValidator<SubmitTestCommand>
     }
 }
 
-// ── Handler ───────────────────────────────────────────────────────────────────
 

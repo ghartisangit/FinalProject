@@ -9,10 +9,7 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Application.Common;
 
-/// <summary>
-/// Resolves a UserId (from JWT sub claim) to the Organization entity.
-/// Organizations have their own Id separate from UserId.
-/// </summary>
+
 public static class OrganizationResolver
 {
     public static async Task<Organization> ResolveAsync(

@@ -4,22 +4,7 @@ using System.Text.Json;
 
 namespace FinalProject_SeventhSem.Middleware;
 
-/// <summary>
-/// Global exception handler. Catches all unhandled exceptions from the pipeline
-/// and maps them to consistent JSON error responses.
-///
-/// Mapping:
-///   NotFoundException                → 404
-///   ValidationException              → 400  (includes field-level errors dict)
-///   BadRequestException              → 400
-///   UnauthorizedException            → 403
-///   OrganizationNotVerifiedException → 403
-///   ConflictException                → 409
-///   InvalidRefreshTokenException     → 401
-///   TestExpiredException             → 400
-///   RateLimitException               → 429
-///   Everything else                  → 500
-/// </summary>
+
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
