@@ -41,6 +41,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IEmailService, SmtpEmailService>();
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();

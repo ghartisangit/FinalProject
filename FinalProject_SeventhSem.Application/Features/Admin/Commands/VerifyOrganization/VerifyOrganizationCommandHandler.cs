@@ -1,4 +1,5 @@
 ﻿using FinalProject_SeventhSem.Application.Exceptions;
+using FinalProject_SeventhSem.Application.Interfaces;
 using FinalProject_SeventhSem.Domain.Entities;
 using FinalProject_SeventhSem.Domain.Enums;
 using FinalProject_SeventhSem.Domain.Interfaces;
@@ -16,15 +17,18 @@ public class VerifyOrganizationCommandHandler : IRequestHandler<VerifyOrganizati
     private readonly IRepository<Organization> _orgRepo;
     private readonly IRepository<User> _userRepo;
     private readonly IUnitOfWork _uow;
+    private readonly IEmailService _emailService;
 
     public VerifyOrganizationCommandHandler(
         IRepository<Organization> orgRepo,
         IRepository<User> userRepo,
-        IUnitOfWork uow)
+        IUnitOfWork uow,
+        IEmailService emailService)
     {
         _orgRepo = orgRepo;
         _userRepo = userRepo;
         _uow = uow;
+        _emailService = emailService;
     }
 
     //public async Task<VerifyOrganizationResponse> Handle(VerifyOrganizationCommand request, CancellationToken cancellationToken)
@@ -98,6 +102,18 @@ public class VerifyOrganizationCommandHandler : IRequestHandler<VerifyOrganizati
         _orgRepo.Update(org);
         _userRepo.Update(user);
         await _uow.SaveChangesAsync(cancellationToken);
+
+        if (request.Status == OrganizationStatus.Verified)
+        {
+            await _emailService.SendOrganizationApprovedEmailAsync(
+                user.Email, org.Name, cancellationToken);
+        }
+        else if (request.Status == OrganizationStatus.Rejected)
+        {
+            await _emailService.SendOrganizationRejectedEmailAsync(
+                user.Email, org.Name, org.Reason, cancellationToken);
+        }
+       
 
         return new VerifyOrganizationResponse(
             OrganizationId: org.Id,

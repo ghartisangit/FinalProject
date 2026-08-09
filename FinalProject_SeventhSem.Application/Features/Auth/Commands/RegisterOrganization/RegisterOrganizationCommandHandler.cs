@@ -19,17 +19,20 @@ public class RegisterOrganizationCommandHandler
     private readonly IRepository<Organization> _orgRepo;
     private readonly IUnitOfWork _uow;
     private readonly IPasswordService _passwordService;
+    private readonly IEmailService _emailService;
 
     public RegisterOrganizationCommandHandler(
         IRepository<User> userRepo,
         IRepository<Organization> orgRepo,
         IUnitOfWork uow,
-        IPasswordService passwordService)
+        IPasswordService passwordService,
+        IEmailService emailService)
     {
         _userRepo = userRepo;
         _orgRepo = orgRepo;
         _uow = uow;
         _passwordService = passwordService;
+        _emailService = emailService;
     }
 
     public async Task<string> Handle(
@@ -60,6 +63,8 @@ public class RegisterOrganizationCommandHandler
         };
         await _orgRepo.AddAsync(org, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
+        await _emailService.SendOrganizationPendingApprovalEmailAsync(
+           user.Email, org.Name, cancellationToken);
 
         return "Organization registered successfully. Await admin verification before logging in.";
     }

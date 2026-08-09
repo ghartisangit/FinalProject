@@ -43,6 +43,9 @@ public static class ApplicationServiceRegistration
         services.Configure<AdminSeedSettings>(
             configuration.GetSection(AdminSeedSettings.SectionName));
 
+        services.Configure<EmailSettings>(
+            configuration.GetSection(EmailSettings.SectionName));
+
         return services;
     }
 }

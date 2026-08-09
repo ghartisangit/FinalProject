@@ -23,6 +23,8 @@ public class RegisterStudentCommandHandler
     private readonly IJwtService _jwtService;
     private readonly ITokenService _tokenService;
     private readonly IRepository<FinalProject_SeventhSem.Domain.Entities.RefreshToken> _refreshTokenRepo;
+    private readonly IEmailService _emailService;
+
 
     public RegisterStudentCommandHandler(
         IRepository<User> userRepo,
@@ -31,7 +33,8 @@ public class RegisterStudentCommandHandler
         IPasswordService passwordService,
         IJwtService jwtService,
         ITokenService tokenService,
-        IRepository<FinalProject_SeventhSem.Domain.Entities.RefreshToken> refreshTokenRepo)
+        IRepository<FinalProject_SeventhSem.Domain.Entities.RefreshToken> refreshTokenRepo,
+          IEmailService emailService)
     {
         _userRepo = userRepo;
         _studentRepo = studentRepo;
@@ -40,6 +43,7 @@ public class RegisterStudentCommandHandler
         _jwtService = jwtService;
         _tokenService = tokenService;
         _refreshTokenRepo = refreshTokenRepo;
+        _emailService = emailService;
     }
 
     public async Task<AuthResponse> Handle(
@@ -75,6 +79,8 @@ public class RegisterStudentCommandHandler
         };
         await _refreshTokenRepo.AddAsync(refreshToken, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
+        await _emailService.SendRegistrationSuccessEmailAsync(
+           user.Email, student.FullName, cancellationToken);
 
         return new AuthResponse(
             AccessToken: _jwtService.GenerateAccessToken(user),
