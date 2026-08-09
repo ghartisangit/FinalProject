@@ -13,7 +13,6 @@ public class TestSettings
     public int QuestionsPerTest { get; set; } = 20;
 }
 
-/// <summary>Maps to "Thresholds" in appsettings.json.</summary>
 public class ThresholdSettings
 {
     public const string SectionName = "Thresholds";
@@ -27,16 +26,10 @@ public class ThresholdSettings
     public double EducationOptionalBonus { get; set; } = 5;
     public double EducationLevelBonus { get; set; }
 
-    /// <summary>
-    /// Max possible RankingScore — denominator for FinalScore normalisation.
-    /// RequirementFit(100) + TestScore*0.30(30) + OptionalFit*0.15(15)
-    /// + EducationBonus(5) + ProfileBonus(10) = 160.
-    /// Documented here so changing weights stays in sync.
-    /// </summary>
     public double MaxRankingScore => 160;
 }
 
-/// <summary>Maps to "ResumeParsingSettings" in appsettings.json.</summary>
+
 public class ResumeParsingSettings
 {
     public const string SectionName = "ResumeParsingSettings";

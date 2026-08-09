@@ -14,22 +14,6 @@ using System.Threading.Tasks;
 namespace FinalProject_SeventhSem.Infrastructure.Engines;
 
 
-/// <summary>
-/// Implements IMatchingService.
-///
-/// Algorithm 3 — Education Check (Rule-Based Hard Filter):
-///   Compares student EducationLevel enum ordinal to vacancy requirement.
-///
-/// Algorithm 4 — Requirement Fit (Set Intersection Ratio):
-///   matched = |StudentSkills ∩ RequiredSkills|
-///   RequirementFit = (matched / total) * 100
-///
-/// Algorithm 5 — Optional Fit (Set Intersection Ratio):
-///   Same formula applied to optional skills.
-///
-/// Algorithm 6 — Skill Gap (Set Difference):
-///   MissingSkills = (RequiredSkills ∪ OptionalSkills) − StudentSkills
-/// </summary>
 public class MatchingEngine : IMatchingService
 {
     private readonly ThresholdSettings _thresholds;
@@ -52,15 +36,6 @@ public class MatchingEngine : IMatchingService
 
         if (!meetsLevel)
             return (false, 0);
-
-        // Optional field-of-study match → +EducationOptionalBonus
-        //double bonus = _thresholds.EducationLevelBonus;
-        //if (!string.IsNullOrWhiteSpace(vacancy.RequiredFieldOfStudy) &&
-        //    !string.IsNullOrWhiteSpace(student.FieldOfStudy) &&
-        //    student.FieldOfStudy.Equals(vacancy.RequiredFieldOfStudy, StringComparison.OrdinalIgnoreCase))
-        //{
-        //    bonus += _thresholds.EducationOptionalBonus;
-        //}
 
         return (true, _thresholds.EducationLevelBonus);
     }
