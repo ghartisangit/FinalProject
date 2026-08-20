@@ -17,19 +17,7 @@ using System.Threading.Tasks;
 namespace FinalProject_SeventhSem.Application.Features.Tests.Commands.StartTest;
 
 
-/// <summary>
-/// Algorithm 7 — Random Non-Repeating Round-Robin Question Selection.
-///
-/// Steps:
-///  1. Fetch all chapters with their questions.
-///  2. Fetch seenQuestionIds for this student.
-///  3. Loop round-robin over chapters:
-///       - availableQuestions = chapter.Questions EXCEPT seenQuestionIds
-///       - Pick ONE random question from available pool
-///       - Track in-memory to prevent intra-test duplicates
-///  4. Repeat until TotalQuestions reached or all chapters exhausted.
-///  5. Create Test entity. Bulk-insert seen questions on submission (not here).
-/// </summary>
+
 public class StartTestCommandHandler : IRequestHandler<StartTestCommand, TestSessionResponse>
 {
     private readonly IRepository<Student> _studentRepo;
@@ -72,18 +60,6 @@ public class StartTestCommandHandler : IRequestHandler<StartTestCommand, TestSes
             .Select(s => s.QuestionId)
             .ToHashSet();
 
-        //var chapters = (await _chapterRepo.GetAllAsync(cancellationToken))
-        //    .Where(c => c.Questions.Any())
-        //    .ToList();
-
-        //var chapters = await _chapterRepo.GetAllAsync(
-        //   q => q
-        //       .Include(c => c.Questions)
-        //       .Include(c => c.Stack)
-        //       .Where(c => c.Questions.Any()),
-        //   cancellationToken);
-
-
         var chapters = await _chapterRepo.GetAllAsync(
          q => q
              .Include(c => c.Questions)
@@ -99,7 +75,7 @@ public class StartTestCommandHandler : IRequestHandler<StartTestCommand, TestSes
         var rng = new Random();
         int total = _settings.QuestionsPerTest;
 
-        // Round-robin over chapters until we have enough or all are exhausted
+   
         bool anyAvailable = true;
         while (selected.Count < total && anyAvailable)
         {

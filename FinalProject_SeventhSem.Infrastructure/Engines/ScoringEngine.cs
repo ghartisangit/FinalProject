@@ -11,22 +11,7 @@ using System.Threading.Tasks;
 
 namespace FinalProject_SeventhSem.Infrastructure.Engines;
 
-/// <summary>
-/// Implements IScoringService.
-///
-/// Algorithm 12 — Weighted Multi-Factor Scoring:
-///
-///   RankingScore = RequirementFit
-///                + (LatestTestScore × AptitudeBonusWeight)   // max 30
-///                + (OptionalFit × OptionalSkillWeight)        // max 15
-///                + EducationBonus                             // max 5
-///                + ProfileBonus                               // max 10
-///
-///   FinalScore = (RankingScore / MaxRankingScore) × 100
-///
-/// Denominator = 160 (documented in ThresholdSettings.MaxRankingScore).
-/// Profile Bonus: GitHub +4, Portfolio +4, LinkedIn +2.
-/// </summary>
+
 public class ScoringEngine : IScoringService
 {
     private readonly ThresholdSettings _t;
@@ -75,4 +60,5 @@ public class ScoringEngine : IScoringService
             ApplicationStatus: applicationStatus);
     }
 }
+
 
